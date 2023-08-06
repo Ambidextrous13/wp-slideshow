@@ -1,0 +1,37 @@
+.pbSliderContainer {
+	position:relative;
+	height: 600px;
+	width: 850px;
+}
+
+.pbSlider {
+	position:absolute;
+	top:0;
+	left:0;
+}
+
+.pbSlider img {
+	max-width:100%;
+}
+
+.active {
+	display:block;
+}
+
+.hidden {
+	display:none;
+}
+.wpss-slideshow{
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+.wpss-align-left{
+	align-items: flex-start;
+}
+.wpss-align-right{
+	align-items: flex-end;
+}
+.wpss-align-centre{
+	align-items: center;
+}
