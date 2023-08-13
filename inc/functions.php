@@ -13,9 +13,65 @@ define( 'WPSS_PLUGIN_SRC_URL', plugin_dir_url( WPSS_PLUGIN_PATH . 'assets/src/cs
 
 /**
  * Autoloader for class files.
- */
+*/
 require_once WPSS_PLUGIN_PATH . 'inc/helper/autoloader.php';
+
+register_activation_hook( WPSS_PLUGIN_PATH . 'wp-slideshow.php', 'create_the_wpss_plugin_data_table' );
+
 $global_wpss_class_instance = new Wpss();
+
+/**
+ * Creates a database table upon activation of the plugin.
+*
+* @return void
+*/
+function create_the_wpss_plugin_data_table() {
+	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$table_name = $wpdb->prefix . 'wpss';
+
+	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+		$sql = "CREATE TABLE $table_name (
+		wpss_key VARCHAR(255) NOT NULL,
+		wpss_value TEXT NOT NULL,
+		PRIMARY KEY  (wpss_key)
+		) $charset_collate;";
+
+		require_once untrailingslashit( ABSPATH ) . '/wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+
+		$default_data = [
+			'slide_order' => [],
+			'slide_start' => '1',
+			'slide_end'   => '-1',
+			'slide_limit' => '0',
+			'prev_height' => '180',
+			'prev_width'  => '180',
+			'prev_is_sq'  => '1',
+			'prev_h_max'  => '250',
+			'prev_w_max'  => '250',
+			'web_height'  => '180',
+			'web_width'   => '180',
+			'web_is_sq'   => '1',
+			'web_h_max'   => '1080',
+			'web_w_max'   => '1920',
+			'alignment'   => '0',
+		];
+		foreach ( $default_data as $key => $value ) {
+			$storable = $value;
+			if ( is_array( $value ) ) {
+				$storable = wp_json_encode( $value );
+			}
+			$data  = [
+				'wpss_key'   => $key,
+				'wpss_value' => $storable,
+			];
+			$metas = [ '%s', '%s' ];
+			$wpdb->insert( $table_name, $data, $metas );
+		}
+	}
+}
 
 add_action( 'admin_enqueue_scripts', 'wpss_assets_enqueuer_admin' );
 
