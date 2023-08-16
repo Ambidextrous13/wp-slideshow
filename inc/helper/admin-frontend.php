@@ -6,7 +6,23 @@
  * @author t0nystark <https://profiles.wordpress.org/t0nystark/>
  */
 
- ?>
+global $global_wpss_class_instance;
+if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+	if ( ! isset( $_POST['dont_copy_the_nonce'] )
+		|| ! wp_verify_nonce( $_POST['dont_copy_the_nonce'], 'action_camera_light' )
+		|| ! current_user_can( 'edit_posts' )
+		) {
+		$error_ = new WP_Error( '001', 'invalid token' );
+		wp_send_json_error(
+			$error_,
+			400
+		);
+	} else {
+		$wpss_uploads = $global_wpss_class_instance->save_the_images();
+	}
+}
+$wpss_slides = [ '1', '2', '3' ];
+?>
 <div id="accordion">
 	<h3 class="accordion-heading"> Settings</h3>
 	<div id="settings">
@@ -71,30 +87,30 @@
 	
 	<h3 class="accordion-heading">Preview</h3>
 	<div>
-		<form id="wpss-form" action="">
-			<label for="upload">Add more slides</label>
-			<input type="file" name="files" id="files" accept="image/*" multiple>
-			<button type="button" name="upload" id="upload" >Upload</button>
-			<div id="sortable" class="slides-container">
-
-				<div data="img-1" class="ui-state-default img-holder img-1"><div class="slide-delete"></div>1</div>
-				<div data="img-2" class="ui-state-default img-holder img-2"><div class="slide-delete"></div>2</div>
-				<div data="img-3" class="ui-state-default img-holder img-3"><div class="slide-delete"></div>3</div>
-				<div data="img-4" class="ui-state-default img-holder img-4"><div class="slide-delete"></div>4</div>
-				<div data="img-5" class="ui-state-default img-holder img-5"><div class="slide-delete"></div>5</div>
-				<div data="img-6" class="ui-state-default img-holder img-6"><div class="slide-delete"></div>6</div>
-				<div data="img-7" class="ui-state-default img-holder img-7"><div class="slide-delete"></div>7</div>
-				<div data="img-8" class="ui-state-default img-holder img-8"><div class="slide-delete"></div>8</div>
-				<div data="img-9" class="ui-state-default img-holder img-9"><div class="slide-delete"></div>9</div>
-				<div data="img-10" class="ui-state-default img-holder img-10"><div class="slide-delete"></div>10</div>
-				<div data="img-11" class="ui-state-default img-holder img-11"><div class="slide-delete"></div>11</div>
-				<div data="img-12" class="ui-state-default img-holder img-12"><div class="slide-delete"></div>12</div>
-				<div data="img-13" class="ui-state-default img-holder img-13"><div class="slide-delete"></div>13</div>
-				<div data="img-14" class="ui-state-default img-holder img-14"><div class="slide-delete"></div>14</div>
-				<div data="img-15" class="ui-state-default img-holder img-15"><div class="slide-delete"></div>15</div>
-			</div>
+		<form method="POST" action="" enctype="multipart/form-data">
+			<label for="upload"><?php echo esc_html( _n( 'Add slides', 'Add more slides', count( $wpss_slides ) + 1, 'slideshow' ) ); ?></label>
+			<input type="file" name="files[]" id="wpss-files" accept="image/*" multiple>
+			<?php wp_nonce_field( 'action_camera_light', 'dont_copy_the_nonce' ); ?>
+			<button id="upload" type="submit" class="submit-btn" name="upload"><?php esc_html_e( 'Upload', 'slideshow' ); ?></button>
 		</form>
-		<div id="delete-dialogue">
+		<div id="sortable" class="slides-container">
+			<div data="img-1" class="ui-state-default img-holder img-1"><div class="slide-delete"></div>1</div>
+			<div data="img-2" class="ui-state-default img-holder img-2"><div class="slide-delete"></div>2</div>
+			<div data="img-3" class="ui-state-default img-holder img-3"><div class="slide-delete"></div>3</div>
+			<div data="img-4" class="ui-state-default img-holder img-4"><div class="slide-delete"></div>4</div>
+			<div data="img-5" class="ui-state-default img-holder img-5"><div class="slide-delete"></div>5</div>
+			<div data="img-6" class="ui-state-default img-holder img-6"><div class="slide-delete"></div>6</div>
+			<div data="img-7" class="ui-state-default img-holder img-7"><div class="slide-delete"></div>7</div>
+			<div data="img-8" class="ui-state-default img-holder img-8"><div class="slide-delete"></div>8</div>
+			<div data="img-9" class="ui-state-default img-holder img-9"><div class="slide-delete"></div>9</div>
+			<div data="img-10" class="ui-state-default img-holder img-10"><div class="slide-delete"></div>10</div>
+			<div data="img-11" class="ui-state-default img-holder img-11"><div class="slide-delete"></div>11</div>
+			<div data="img-12" class="ui-state-default img-holder img-12"><div class="slide-delete"></div>12</div>
+			<div data="img-13" class="ui-state-default img-holder img-13"><div class="slide-delete"></div>13</div>
+			<div data="img-14" class="ui-state-default img-holder img-14"><div class="slide-delete"></div>14</div>
+			<div data="img-15" class="ui-state-default img-holder img-15"><div class="slide-delete"></div>15</div>
+		</div>
+		<div id="delete-dialogue" class="dp-none">
 			<div class="delete-caution">
 				<div class="caution-logo"></div>
 				<p class="caution-text">Caution</p>

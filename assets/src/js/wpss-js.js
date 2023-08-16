@@ -18,6 +18,22 @@
 		});
 
 		$( "#sortable" ).disableSelection();
+
+		$( '#upload' ).button( {
+			icon: 'ui-icon-arrowthickstop-1-n',
+			iconPosition: 'end',
+		} );
+
+		// disable upload button
+		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
+		$( '#wpss-files' ).on( 'change', ( event ) => {
+			const target = event.target;
+			if ( target.files?.length ) {
+				$( '#upload' ).prop( 'disabled', false ).removeAttr( 'title' );
+			} else {
+				$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
+			}
+		} );
 		
 		$( "#sortable" ).on( "sortupdate", function( event, ui ) {
 			console.log(
