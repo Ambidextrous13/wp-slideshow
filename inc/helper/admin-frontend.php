@@ -19,6 +19,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		);
 	} else {
 		$wpss_uploads = $global_wpss_class_instance->save_the_images();
+		if ( is_array( $wpss_uploads ) ) {
+			$global_wpss_class_instance->wpss_enqueue_images( $wpss_uploads );
+		} else {
+			$show_formats = true;
+		}
 	}
 }
 $wpss_slides = [ '1', '2', '3' ];
