@@ -21,10 +21,58 @@ class Wpss {
 	public $plugin_path = '';
 
 	/**
+	 * The master database name for the plugin.
+	 *
+	 * @var string
+	 */
+	public $table_name = '';
+
+	/**
+	 * Contains the valid keys for the WPSS Data Table.
+	 *
+	 * @var array
+	 */
+	public const TABLE_KEYS = [
+		'slide_order',
+		'slide_start',
+		'slide_end',
+		'slide_limit',
+		'prev_height',
+		'prev_width',
+		'prev_is_sq',
+		'prev_h_max',
+		'prev_w_max',
+		'web_height',
+		'web_width',
+		'web_is_sq',
+		'web_h_max',
+		'web_w_max',
+		'alignment',
+	];
+
+	/**
+	 * Stores the keys of the WPSS Data Table required for the slideshow on web pages.
+	 *
+	 * @var array
+	 */
+	public const FRONT_END_KEYS = [
+		'alignment',
+		'web_is_sq',
+		'slide_end',
+		'slide_order',
+		'slide_start',
+		'web_height',
+		'web_width',
+		'slide_limit',
+	];
+	
+	/**
 	 * Initializes the class.
 	 */
 	public function __construct() {
+		global $wpdb;
 		$this->plugin_path = dirname( __DIR__, 2 ) . '/';
+		$this->table_name  = $wpdb->prefix . 'wpss';
 		$this->init_hooks();
 	}
 
@@ -119,5 +167,139 @@ class Wpss {
 			}
 			return $attachments_id;
 		}
+	}
+
+	/**
+	 * Registers the slides in the database by appending them to the current slide master.
+	 *
+	 * This function registers the slides into the database by appending them to the existing slide master.
+	 * You can provide an array of attachment IDs of uploaded images, which can be obtained using the `save_the_images` function.
+	 *
+	 * @param array $uploads An array of attachment IDs of uploaded images obtained from the `save_the_images` function.
+	 * @return boolean True if the operation succeeds; otherwise, false.
+	 */
+	public function wpss_enqueue_images( $uploads ) {
+		$db_data = $this->db_slides_fetcher();
+		$slides  = $db_data['slide_order'];
+		$d_len   = count( $slides );
+		foreach ( $uploads as $sr => $attachment_id ) {
+			$slides[ $d_len + $sr ] = $attachment_id;
+		}
+		if ( ! $this->db_inserter( $slides, [ 'slide_end' => $db_data['slide_end'] ] ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Inserts a row of data into the database. Note: Validation and sanitization must be performed before using this function.
+	 *
+	 * @param array $insert_array An array of data containing slide order numbers as keys and attachment IDs as values.
+	 * @param array $settings Additional settings provided via this array. Refer to the example array below:
+	 * [
+	 *    'slide_start' => 1,
+	 *    'slide_end'   => -1,
+	 *    'slide_limit' => 0,
+	 *    'prev_height' => 180,
+	 *    'prev_width'  => 180,
+	 *    'prev_is_sq'  => 1,
+	 *    'prev_h_max'  => 250,
+	 *    'prev_w_max'  => 250,
+	 *    'web_height'  => 180,
+	 *    'web_width'   => 180,
+	 *    'web_is_sq'   => 1,
+	 *    'web_h_max'   => 1080,
+	 *    'web_w_max'   => 1920,
+	 * ].
+	 * @return boolean True if the operation succeeds; otherwise, false.
+	 */
+	public function db_inserter( $insert_array, $settings = [] ) {
+		if ( is_array( $insert_array ) && ! empty( $insert_array ) ) {
+			foreach ( $insert_array as $sr => $id ) {
+				if ( gettype( 'string' !== $id ) ) {
+					$insert_array[ $sr ] = strval( $id );
+				}
+			}
+			$settings['slide_order'] = $insert_array;
+		}
+
+		if ( $this->key_value_verifier( $settings ) ) {
+			global $wpdb;
+			if ( isset( $settings['slide_order'] ) && isset( $settings['slide_end'] ) ) {
+				$total_slides = count( $settings['slide_order'] );
+				if ( $total_slides < $settings['slide_end'] ) {
+					$settings['slide_end'] = $total_slides;
+				}
+				$settings['slide_order'] = wp_json_encode( $settings['slide_order'] );
+			} else {
+				unset( $settings['slide_order'] );
+			}
+			foreach ( $settings as $key => $value ) {
+				$data  = [
+					'wpss_value' => $value,
+				];
+				$where = [
+					'wpss_key' => $key,
+				];
+
+				$data_format = [ '%s' ];
+				$wher_format = [ '%s' ];
+				$wpdb->update( $this->table_name, $data, $where, $data_format, $wher_format );
+			}
+		} else {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Retrieves the latest slideshow data from the database.
+	 *
+	 * @param boolean $is_admin_panel If the request is made for the admin panel.
+	 * @return array An array containing sorted attachment IDs according to user-arranged slides if $is_admin_panel is false.
+	 *              If $is_admin_panel is true, it returns all key-value pairs.
+	 */
+	public function db_slides_fetcher( $is_admin_panel = false ) {
+		$keys = [];
+		if ( $is_admin_panel ) {
+			$keys = self::TABLE_KEYS;
+		} else {
+			$keys = self::FRONT_END_KEYS;
+		}
+		global $wpdb;
+		$data = [];
+		foreach ( $keys as $key ) {
+			$temp = $wpdb->get_row(
+				$wpdb->prepare(
+					//phpcs:ignore
+					"SELECT * FROM $this->table_name WHERE wpss_key = %s;", 
+					$key,
+				),
+				'ARRAY_N'
+			);
+
+			$data[ $temp[0] ] = $temp[1];
+		}
+		if ( isset( $data['slide_order'] ) ) {
+			$data['slide_order'] = json_decode( $data['slide_order'], true );
+		}
+		return $data;
+	}
+
+	/**
+	 * Validates data before insertion.
+	 *
+	 * This function validates data before inserting it into the database.
+	 * Please ensure that slide order is in array form, not JSON.
+	 *
+	 * @param array $pairs An array of key-value pairs to be inserted into the database.
+	 * @return boolean `true` if no false or malicious data is found; otherwise, `false`.
+	 */
+	public function key_value_verifier( $pairs ) {
+		if ( ! is_array( $pairs ) ) {
+			return false;
+		}
+		// Verifier Yet to Program.
+		return true;
 	}
 }
