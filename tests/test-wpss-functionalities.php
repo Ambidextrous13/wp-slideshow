@@ -1,7 +1,4 @@
 <?php
-/**
- * @group ajax
- */
 
 Use WPSS\Inc\Classes\Wpss;
 use PHPUnit\Framework\TestCase;
@@ -75,5 +72,33 @@ class WpssTest extends TestCase {
         $this->assertTrue( is_array( $ids ) && ! empty( $ids ) );
     }
 
+	public function test_wpss_class_wpss_enqueue_images() {
+        $ids = $this->wpss_class_save_the_images();
+        $this->assertTrue( $this->wpss->wpss_enqueue_images( $ids ) );
+    }
+
+    public function test_wpss_class_db_inserter() {
+        $data = [
+            'slide_start' => 1,
+            'slide_end'   => 2 * $this->attachment_count,
+            'slide_limit' => 1,
+            'prev_height' => 200,
+            'prev_width'  => 220,
+            'prev_is_sq'  => 0,
+            'web_height'  => 500,
+            'web_width'   => 540,
+            'web_is_sq'   => 0,
+        ];
+
+        $this->assertTrue( $this->wpss->db_inserter( null, $data ) );
+    }
+
+    public function test_wpss_class_db_slides_fetcher() {
+        $data = $this->wpss->db_slides_fetcher( true );
+        $this->assertTrue( is_array( $data ) && ! empty( $data ) );
+
+        $data = $this->wpss->db_slides_fetcher( false );
+        $this->assertTrue( is_array( $data ) && ! empty( $data ) );
+    }
 }
 ?>
