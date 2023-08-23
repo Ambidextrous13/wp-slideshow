@@ -287,6 +287,80 @@ class Wpss {
 	}
 
 	/**
+	 * Handles Ajax verification and data sending for admin-side requests.
+	 *
+	 * This function manages Ajax verification and data transmission for requests made on the admin side.
+	 * Action: wpss_plugin_settings_fetcher.
+	 *
+	 * @return void
+	 */
+	public function fetch_settings() {
+		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
+			echo wp_json_encode( 
+				[ 
+					'alert_string' => 'Invalid Security Token',
+					'succeed'      => false
+				]
+			);
+			wp_die( '0', 400 );
+		}
+
+		$data = $this->db_slides_fetcher( true );
+
+		$data['slide_order'] = wp_json_encode( $data['slide_order'] );
+		echo wp_json_encode( $data );
+		wp_die();
+	}
+
+	/**
+	 * Handles Ajax calls for saving slide settings.
+	 *
+	 * This function serves as an Ajax call handler for saving the settings of the slides.
+	 * Action: wpss_plugin_settings_setter.
+	 *
+	 * @return void
+	 */
+	public function settings_saver() {
+		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
+			echo wp_json_encode(
+				[ 
+					'alert_string' => 'Invalid Security Token',
+					'succeed'      => false
+				] 
+			);
+			wp_die( '0', 400 );
+		}
+
+		$rec = $_POST['wpss_settings'];
+		if ( is_array( $rec ) && ! empty( $rec ) ) {
+			if ( $this->key_value_verifier( $rec ) ) {
+				$this->db_inserter( null, $rec );
+				echo wp_json_encode(
+					[ 
+						'alert_string' => 'Saved!',
+						'succeed'      => true
+					]
+				);
+				wp_die( '0', 200 );
+			}
+			echo wp_json_encode(
+				[ 
+					'alert_string' => 'Verifier failed',
+					'succeed'      => false
+				]
+			);
+			wp_die( '0', 400 );
+		}
+		echo wp_json_encode(
+			[ 
+				'alert_string' => 'Invalid Data Given',
+				'succeed'      => false
+			]
+		);
+		wp_die( '0', 400 );
+	}
+
+	/**
 	 * Validates data before insertion.
 	 *
 	 * This function validates data before inserting it into the database.
