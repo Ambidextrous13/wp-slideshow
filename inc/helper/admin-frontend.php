@@ -26,10 +26,15 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		}
 	}
 }
-$wpss_slides = [ '1', '2', '3' ];
+
+$wpss_settings = $global_wpss_class_instance->db_slides_fetcher( true );
+$wpss_slides   = $wpss_settings['slide_order'];
+if ( ! is_array( $wpss_slides ) ) {
+	$wpss_slides = [];
+}
 ?>
 <div id="accordion">
-	<h3 class="accordion-heading"> Settings</h3>
+	<h3 class="accordion-heading"><?php esc_html_e( 'Settings', 'slideshow' ); ?></h3>
 	<div id="settings">
 		<div class="preview-size">
 			<fieldset>
@@ -90,7 +95,7 @@ $wpss_slides = [ '1', '2', '3' ];
 		</div>
 	</div>
 	
-	<h3 class="accordion-heading">Preview</h3>
+	<h3 class="accordion-heading"><?php esc_html_e( 'Slides', 'slideshow' ); ?></h3>
 	<div>
 		<form method="POST" action="" enctype="multipart/form-data">
 			<label for="upload"><?php echo esc_html( _n( 'Add slides', 'Add more slides', count( $wpss_slides ) + 1, 'slideshow' ) ); ?></label>
@@ -99,32 +104,28 @@ $wpss_slides = [ '1', '2', '3' ];
 			<button id="upload" type="submit" class="submit-btn" name="upload"><?php esc_html_e( 'Upload', 'slideshow' ); ?></button>
 		</form>
 		<div id="sortable" class="slides-container">
-			<div data="img-1" class="ui-state-default img-holder img-1"><div class="slide-delete"></div>1</div>
-			<div data="img-2" class="ui-state-default img-holder img-2"><div class="slide-delete"></div>2</div>
-			<div data="img-3" class="ui-state-default img-holder img-3"><div class="slide-delete"></div>3</div>
-			<div data="img-4" class="ui-state-default img-holder img-4"><div class="slide-delete"></div>4</div>
-			<div data="img-5" class="ui-state-default img-holder img-5"><div class="slide-delete"></div>5</div>
-			<div data="img-6" class="ui-state-default img-holder img-6"><div class="slide-delete"></div>6</div>
-			<div data="img-7" class="ui-state-default img-holder img-7"><div class="slide-delete"></div>7</div>
-			<div data="img-8" class="ui-state-default img-holder img-8"><div class="slide-delete"></div>8</div>
-			<div data="img-9" class="ui-state-default img-holder img-9"><div class="slide-delete"></div>9</div>
-			<div data="img-10" class="ui-state-default img-holder img-10"><div class="slide-delete"></div>10</div>
-			<div data="img-11" class="ui-state-default img-holder img-11"><div class="slide-delete"></div>11</div>
-			<div data="img-12" class="ui-state-default img-holder img-12"><div class="slide-delete"></div>12</div>
-			<div data="img-13" class="ui-state-default img-holder img-13"><div class="slide-delete"></div>13</div>
-			<div data="img-14" class="ui-state-default img-holder img-14"><div class="slide-delete"></div>14</div>
-			<div data="img-15" class="ui-state-default img-holder img-15"><div class="slide-delete"></div>15</div>
+			<?php
+			foreach ( $wpss_slides as $attachment_id ) {
+				printf( '<div data="%1$s" class="ui-state-default img-holder">', esc_attr( $attachment_id ) );
+				printf( '<div class="slide-delete"></div>' );
+				printf( '<img class="slide-img" src="%s" >', esc_url( wp_get_attachment_url( $attachment_id ) ) );
+				printf( '</div>' );
+			}
+			?>
 		</div>
+		<?php if ( count( $wpss_slides ) ) : ?>
+			<button type="button" class="submit-ajax" id="wpss-rearrange"><?php esc_html_e( 'Confirm', 'slideshow' ); ?></button>
+			<button type="button" class="reset" id="wpss-reset"><?php esc_html_e( 'Reset', 'slideshow' ); ?></button>
+		<?php endif; ?>
 		<div id="delete-dialogue" class="dp-none">
-			<div class="delete-caution">
-				<div class="caution-logo"></div>
-				<p class="caution-text">Caution</p>
+				<div class="delete-caution">
+					<div class="caution-logo"></div>
+					<p class="caution-text"><?php esc_html_e( 'Caution', 'slideshow' ); ?></p>
+				</div>
+				<p class="delete-maintext"><?php esc_html_e( 'Confirm Delete', 'slideshow' ); ?></p>
+				<div id="slide-delete-buttons">
+					<button id="slide-cancel-delete" class="slide-delete-button"><?php esc_html_e( 'Cancel', 'slideshow' ); ?></button>
+				</div>
 			</div>
-			<p class="delete-maintext">Confirm Delete</p>
-			<div id="slide-delete-buttons">
-				<button class="slide-delete-button">Cancel</button>
-				<button class="slide-delete-button">Confirm</button>
-			</div>
-		</div>
 	</div>
 </div>
