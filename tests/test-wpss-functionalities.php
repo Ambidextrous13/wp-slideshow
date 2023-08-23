@@ -67,7 +67,6 @@ class WpssTest extends TestCase {
     }
 	
     public function test_wpss_class_save_the_images() {
-        // echo '5';
         $ids = $this->wpss_class_save_the_images();
         $this->assertTrue( is_array( $ids ) && ! empty( $ids ) );
     }
@@ -100,5 +99,84 @@ class WpssTest extends TestCase {
         $data = $this->wpss->db_slides_fetcher( false );
         $this->assertTrue( is_array( $data ) && ! empty( $data ) );
     }
+
+	protected function ajax_caller( $action ) {
+        ini_set( 'implicit_flush', false );
+
+        ob_start();
+        do_action($action);
+        $response = ob_get_clean();
+
+        $return_arr = [
+            'success' => false,
+            'message' => 'Invalid JSON response',
+        ];
+
+        $pattern = '/\{.*?\}/';
+        if (preg_match($pattern, $response, $matches)) {
+            $extractedString = $matches[0];
+            if (json_decode($extractedString, true)) {
+                $return_arr = json_decode($extractedString, true);
+            }
+        }
+        ini_set('implicit_flush', true);
+        
+        return $return_arr;
+    }
+    
+    public function test_wpss_class_fetch_settings() {
+        $nonce  = wp_create_nonce( 'pointBreak' );
+        $action = 'wpss_plugin_settings_fetcher';
+
+        $_POST['ajaxNonce']    = $nonce;
+        $_REQUEST['ajaxNonce'] = $nonce;
+        $_POST['action']       = $action;
+        $_REQUEST['action']    = $action; 
+
+        $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_settings_fetcher' );
+        $assert_arg = true;
+        
+        foreach ( $this->wpss::TABLE_KEYS as $key ) {
+            $assert_arg = $assert_arg && isset( $response[ $key ] );
+        }
+
+        $this->assertTrue( $assert_arg );
+    }
+
+    public function test_wpss_class_settings_saver() {
+        $nonce  = wp_create_nonce( 'pointBreak' );
+        $action = 'wpss_plugin_settings_setter';
+        
+        $_POST['ajaxNonce']    = $nonce;
+        $_REQUEST['ajaxNonce'] = $nonce;
+        $_POST['action']       = $action;
+        $_REQUEST['action']    = $action; 
+        
+        $_POST['wpss_settings'] = [
+            'slide_start' => '1',
+            'slide_end'   => '1',
+            'slide_limit' => '1',
+            'prev_height' => '100',
+            'prev_width'  => '100',
+            'prev_is_sq'  => '1',
+            'web_height'  => '100',
+            'web_width'   => '100',
+            'web_is_sq'   => '1',
+        ];
+
+        $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_settings_setter' );
+
+        $this->assertTrue( isset( $response['alert_string'] ) && 'Saved!' === $response['alert_string'] );
+                
+        $assert_arg = true;
+        $new_data   = $this->wpss->db_slides_fetcher( true );
+
+        foreach ( $_POST['wpss_settings'] as $key => $value ) {
+            $assert_arg = $assert_arg && $new_data[ $key ] === $value;
+        }
+
+        $this->assertTrue( $assert_arg );
+    }
+
 }
 ?>
