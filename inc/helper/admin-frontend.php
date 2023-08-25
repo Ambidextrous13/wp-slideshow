@@ -34,63 +34,99 @@ if ( ! is_array( $wpss_slides ) ) {
 }
 ?>
 <div id="accordion">
-	<h3 class="accordion-heading"><?php esc_html_e( 'Settings', 'slideshow' ); ?></h3>
-	<div id="settings">
-		<div class="preview-size">
+<h3 class="accordion-heading"><?php esc_html_e( 'Settings', 'slideshow' ); ?></h3>
+	<div id="wpss-settings">
+		<div class="preview-size setting">
 			<fieldset>
-				<legend>Preview Slide Shape: </legend>
-				<label title = "Make preview slide square" for="square">Square(Recommended)</label>
-				<input type="radio" name="radio-shape" id="square" value="1" checked>
-				
-				<label for="rectangle">Rectangle</label>
-				<input type="radio" name="radio-shape" id="rectangle" value="0">
+				<legend><?php esc_html_e( 'Slide Shape(Preview): ', 'slideshow' ); ?></legend>
+				<div class="radios">
+					<label title=<?php esc_attr_e( 'Make preview slide square', 'slideshow' ); ?> for="square"><?php esc_html_e( 'Square', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-shape" id="square" value="1" <?php '1' === $wpss_settings['prev_is_sq'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+					<label for="rectangle"><?php esc_html_e( 'Rectangle', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-shape" id="rectangle" value="0"  <?php '0' === $wpss_settings['prev_is_sq'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+				</div>
 			</fieldset>
-			
+
 			<fieldset>
-				<label for="preview_width">Preview Slide Width</label>
-				<input type="text" id="preview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
-				<div id="slider_width" class="slider"></div>
+				<div class="slider-pack">
+					<label for="preview_width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
+					<input type="text" id="preview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider_width" class="slider"></div>
+				</div>
 			</fieldset>
 			<fieldset id="preview_height_enc" class="dp-none">
-				<label for="preview_height">Preview Slide Height</label>
-				<input type="text" id="preview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
-				<div id="slider_height" class="slider"></div>
+				<div class="slider-pack">
+					<label for="preview_height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
+					<input type="text" id="preview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider_height" class="slider"></div>
+				</div>
 			</fieldset>
 		</div>
-		<div class="webview-size">
+		<div class="webview-size setting">
 			<fieldset>
-				<legend>Actual Slide Shape: </legend>
-				<label for="square-wv">Square(Recommended)</label>
-				<input type="radio" name="radio-shape-wv" id="square-wv" value="1" checked>
-				
-				<label for="rectangle-wv">Rectangle</label>
-				<input type="radio" name="radio-shape-wv" id="rectangle-wv" value="0">
+				<legend><?php esc_html_e( 'Slide Shape(Webview): ', 'slideshow' ); ?></legend>
+				<div class="radios">
+					<label for="square-wv"><?php esc_html_e( 'Square', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-shape-wv" id="square-wv" value="1" <?php '1' === $wpss_settings['web_is_sq'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+					<label for="rectangle-wv"><?php esc_html_e( 'Rectangle', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-shape-wv" id="rectangle-wv" value="0" <?php '0' === $wpss_settings['web_is_sq'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+				</div>
 			</fieldset>
-			
+
 			<fieldset>
-				<label for="webview_width">Actual Slide Width</label>
-				<input type="text" id="webview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
-				<div id="slider_width_wv" class="slider"></div>
+				<div class="slider-pack">
+					<label for="webview_width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
+					<input type="text" id="webview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider_width_wv" class="slider"></div>
+				</div>
 			</fieldset>
 			<fieldset id="webview_height_enc" class="dp-none">
-				<label for="webview_height">Actual Slide Height</label>
-				<input type="text" id="webview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
-				<div id="slider_height_wv" class="slider"></div>
+				<div class="slider-pack">
+					<label for="webview_height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
+					<input type="text" id="webview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider_height_wv" class="slider"></div>
+				</div>
 			</fieldset>
 		</div>
-		<div class="slide-limit">
+		<div class="slide-limit setting">
 			<fieldset>
-				<legend>Slide Range Selector: </legend>
-				<label for="limit">Enable</label>
-				<input type="radio" name="radio-slide-limit" id="limit" value="1" checked>
+				<legend><?php esc_html_e( 'Slide Range Selector', 'slideshow' ); ?></legend>
+				<div class="radios">
+					<label for="limit"><?php esc_html_e( 'Enable', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-slide-limit" id="limit" value="1" <?php '1' === $wpss_settings['slide_limit'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
 
-				<label for="no-limit">Disable</label>
-				<input type="radio" name="radio-slide-limit" id="no-limit" value="0">
+					<label for="no-limit"><?php esc_html_e( 'Disable', 'slideshow' ); ?></label>
+					<input type="radio" name="radio-slide-limit" id="no-limit" value="0" <?php '0' === $wpss_settings['slide_limit'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+				</div>
 			</fieldset>
 			<fieldset id="slide-range-set">
-				<label for="slide-range">Slides Range:</label>
-				<input type="text" id="slide-range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<div class="slide-range-info">
+					<label for="slide-range-start"><?php esc_html_e( 'Slide Start:', 'slideshow' ); ?></label>
+					<input type="text" id="slide-range-start" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<label for="slide-range-end"><?php esc_html_e( 'Slide End:', 'slideshow' ); ?></label>
+					<input type="text" id="slide-range-end" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				</div>
 				<div id="slider-range" class="slider"></div>
+			</fieldset>
+		</div>
+		<div class="alignment-settings setting">
+			<legend><?php esc_html_e( 'Position of Slideshow', 'slideshow' ); ?></legend>
+			<fieldset class="slide-alignment">
+				<label for="left-align-btn"><?php esc_html_e( 'Left', 'slideshow' ); ?></label>
+				<input type="radio" name="radio-slide-alignment" id="left-align-btn" value="0" <?php '0' === $wpss_settings['alignment'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+
+				<label for="centre-align-btn"><?php esc_html_e( 'Centre', 'slideshow' ); ?></label>
+				<input type="radio" name="radio-slide-alignment" id="centre-align-btn" value="1" <?php '1' === $wpss_settings['alignment'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+
+				<label for="right-align-btn"><?php esc_html_e( 'Right', 'slideshow' ); ?></label>
+				<input type="radio" name="radio-slide-alignment" id="right-align-btn" value="2" <?php '2' === $wpss_settings['alignment'] ? esc_attr_e( 'checked', 'slideshow' ) : ''; ?>>
+			</fieldset>
+		</div>
+		<div class="submit-settings setting">
+			<legend><?php esc_html_e( 'Save', 'slideshow' ); ?></legend>
+			<fieldset class="slide-alignment">
+				<button id="save-settings" class="sbt-setting-btn"><?php esc_html_e( 'Save', 'slideshow' ); ?></button>
+				<button id="reset-settings" class="sbt-setting-btn"><?php esc_html_e( 'Reset', 'slideshow' ); ?></button>
 			</fieldset>
 		</div>
 	</div>
