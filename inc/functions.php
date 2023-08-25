@@ -74,6 +74,7 @@ function create_the_wpss_plugin_data_table() {
 }
 
 add_action( 'admin_enqueue_scripts', 'wpss_assets_enqueuer_admin' );
+add_action( 'wp_ajax_wpss_plugin_settings_fetcher', [ $global_wpss_class_instance, 'fetch_settings' ] );
 
 /**
  * Handles the plugin's admin menu assets enqueueing process.
@@ -90,5 +91,14 @@ function wpss_assets_enqueuer_admin() {
 		wp_enqueue_style( 'wpss-j-st', WPSS_PLUGIN_SRC_URL . 'css/jquery-ui.structure.min.css', [ 'wpss-j-ui' ], '1.0' );
 		wp_enqueue_style( 'wpss-j-tm', WPSS_PLUGIN_SRC_URL . 'css/jquery-ui.theme.min.css', [ 'wpss-j-st' ], '1.0' );
 		wp_enqueue_style( 'wpss', WPSS_PLUGIN_SRC_URL . 'css/wpss-admin-end-style.css', [ 'wpss-j-tm' ], filemtime( WPSS_PLUGIN_PATH . 'assets/src/css/wpss-admin-end-style.css' ) );
+
+		wp_localize_script(
+			'wpss-main',
+			'ajaxData',
+			[
+				'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+				'ajaxNonce' => wp_create_nonce( 'pointBreak' ),
+			]
+		);
 	}
 }
