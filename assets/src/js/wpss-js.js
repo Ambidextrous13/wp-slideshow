@@ -24,6 +24,54 @@
 			iconPosition: 'end',
 		} );
 
+
+		// Ajax Calls
+
+		// eslint-disable-next-line no-undef
+		let ajaxUrl;
+		// eslint-disable-next-line no-undef
+		let ajaxNonce;
+
+		// eslint-disable-next-line no-undef
+		if ( ajaxData ) {
+			// eslint-disable-next-line no-undef
+			ajaxUrl = ajaxData.ajaxUrl;
+			// eslint-disable-next-line no-undef
+			ajaxNonce = ajaxData.ajaxNonce;
+		}
+
+		let ajaxOP;
+		const data = {
+			action: 'wpss_plugin_settings_fetcher',
+			ajaxNonce: ajaxNonce,
+		};
+
+		$.ajax( {
+			url: ajaxUrl,
+			type: 'post',
+			data: data,
+			success: ( response ) => {
+				ajaxOP = JSON.parse( response );
+				slidesOrder = JSON.parse( ajaxOP.slide_order );
+
+				ajaxOP.slide_end = -1 === parseInt( ajaxOP.slide_end ) ? slidesOrder.length : ajaxOP.slide_end;
+				slidesOrder.push( '-1' );
+				$( '#preview_width' ).val( ajaxOP.prev_width + 'px' );
+				$( '#preview_height' ).val( ajaxOP.prev_height + 'px' );
+				$( '#webview_width' ).val( ajaxOP.web_width + 'px' );
+				$( '#webview_height' ).val( ajaxOP.web_height + 'px' );
+				$( '#slide-range-start' ).val( ajaxOP.slide_start );
+				$( '#slide-range-end' ).val( ajaxOP.slide_end );
+				ajaxOP.prev_height = '1' === ajaxOP.prev_is_sq ? ajaxOP.prev_width : ajaxOP.prev_height;
+				$( '.img-holder' ).css( 'height', ajaxOP.prev_height );
+				$( '.img-holder' ).css( 'width', ajaxOP.prev_width );
+			},
+			error: ( response ) => {
+				// doing it later
+			},
+			async: true,
+		 } );
+
 		// disable upload button
 		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
 		$( '#wpss-files' ).on( 'change', ( event ) => {
