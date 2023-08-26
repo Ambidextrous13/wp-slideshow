@@ -1,5 +1,20 @@
 ( function ( $ ) {
 	$( document ).ready( function () {
+
+		// Locals
+		const settings = {
+			slide_start: null,
+			slide_end: null,
+			slide_limit: null,
+			prev_height: null,
+			prev_width: null,
+			prev_is_sq: null,
+			web_height: null,
+			web_width: null,
+			web_is_sq: null,
+			alignment: null,
+		};
+
 		$( '.img-holder' ).css( 'height', 120 );
 		$( '.img-holder' ).css( 'width', 120 );
 
@@ -23,7 +38,6 @@
 			icon: 'ui-icon-arrowthickstop-1-n',
 			iconPosition: 'end',
 		} );
-
 
 		// Ajax Calls
 
@@ -65,12 +79,44 @@
 				ajaxOP.prev_height = '1' === ajaxOP.prev_is_sq ? ajaxOP.prev_width : ajaxOP.prev_height;
 				$( '.img-holder' ).css( 'height', ajaxOP.prev_height );
 				$( '.img-holder' ).css( 'width', ajaxOP.prev_width );
+
+				settings.slide_limit = ajaxOP.slide_limit;
+				settings.prev_is_sq = ajaxOP.prev_is_sq;
+				settings.web_is_sq = ajaxOP.web_is_sq;
+				settings.alignment = ajaxOP.alignment;
+				settings.slide_start = ajaxOP.slide_start;
+				settings.slide_end = ajaxOP.slide_end;
+				settings.prev_height = ajaxOP.prev_height;
+				settings.prev_width = ajaxOP.prev_width;
+				settings.web_height = ajaxOP.web_height;
+				settings.web_width = ajaxOP.web_width;
 			},
 			error: ( response ) => {
 				// doing it later
 			},
 			async: true,
-		 } );
+		} );
+
+		$( '#save-settings' ).on( 'click', function() {
+			const settingSaverPayload = {
+				action: 'wpss_plugin_settings_setter',
+				ajaxNonce: ajaxNonce,
+				wpss_settings: settings,
+			};
+			$.ajax( {
+				url: ajaxUrl,
+				type: 'post',
+				data: settingSaverPayload,
+				success: ( response ) => {
+					// do it later
+				},
+				error: ( response ) => {
+					// doing it later
+				},
+				async: true,
+			} );
+		} );
+
 
 		// disable upload button
 		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
@@ -209,5 +255,52 @@
 				}
 			}
 		} );
+
+		let previewShape = settings.prev_is_sq;
+		let webviewShape = settings.web_is_sq;
+		let rangeEnable = settings.slide_limit;
+		let slideAlignment = settings.alignment;
+		$( '#wpss-settings' ).on( 'change', function() {
+			previewShape = $( 'input[name=radio-shape]:checked', '#wpss-settings' ).val();
+			webviewShape = $( 'input[name=radio-shape-wv]:checked', '#wpss-settings' ).val();
+			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss-settings' ).val();
+			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss-settings' ).val();
+
+			if ( '0' === previewShape && $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
+				$( '#preview_height_enc' ).removeClass( 'dp-none' );
+				settings.prev_is_sq = '0';
+			} else if ( '1' === previewShape && ! $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
+				$( '#preview_height_enc' ).addClass( 'dp-none' );
+				settings.prev_is_sq = '1';
+				settings.prev_height = settings.prev_width;
+				$( '.img-holder' ).css( 'height', settings.prev_height );
+				$( '.img-holder' ).css( 'width', settings.prev_width );
+			}
+
+			if ( '0' === webviewShape && $( '#webview_height_enc' ).hasClass( 'dp-none' ) ) {
+				$( '#webview_height_enc' ).removeClass( 'dp-none' );
+				settings.web_is_sq = '0';
+			} else if ( '1' === webviewShape && ! $( '#webview_height_enc' ).hasClass( 'dp-none' ) ) {
+				$( '#webview_height_enc' ).addClass( 'dp-none' );
+				settings.web_is_sq = '1';
+			}
+
+			if ( '1' === rangeEnable && $( '#slide-range-set' ).hasClass( 'dp-none' ) ) {
+				$( '#slide-range-set' ).removeClass( 'dp-none' );
+				settings.slide_limit = '1';
+			} else if ( '0' === rangeEnable && ! $( '#slide-range-set' ).hasClass( 'dp-none' ) ) {
+				$( '#slide-range-set' ).addClass( 'dp-none' );
+				settings.slide_limit = '0';
+			}
+
+			if ( '0' === slideAlignment ) {
+				settings.alignment = '0';
+			} else if ( '1' === slideAlignment ) {
+				settings.alignment = '1';
+			} else if ( '2' === slideAlignment ) {
+				settings.alignment = '2';
+			}
+		} );
+		$( '#wpss-settings' ).trigger( 'change' );
 	} );
 }( jQuery ) );
