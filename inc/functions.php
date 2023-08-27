@@ -76,6 +76,7 @@ function create_the_wpss_plugin_data_table() {
 add_action( 'admin_enqueue_scripts', 'wpss_assets_enqueuer_admin' );
 add_action( 'wp_ajax_wpss_plugin_settings_fetcher', [ $global_wpss_class_instance, 'fetch_settings' ] );
 add_action( 'wp_ajax_wpss_plugin_settings_setter', [ $global_wpss_class_instance, 'settings_saver' ] );
+add_action( 'wp_ajax_wpss_plugin_slide_rearrange', [ $global_wpss_class_instance, 'slides_rearrange' ] );
 
 /**
  * Handles the plugin's admin menu assets enqueueing process.
