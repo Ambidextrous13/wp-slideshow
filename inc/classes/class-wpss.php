@@ -361,6 +361,76 @@ class Wpss {
 	}
 
 	/**
+	 * Handles Ajax calls for saving slide changes.
+	 *
+	 * This function serves as an Ajax call handler for saving changes in the slides, including rearrangement, deletion, and insertion.
+	 * Actions: wpss_plugin_slide_rearrange.
+	 *
+	 * @return void
+	 */
+	public function slides_rearrange() {
+		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
+			echo wp_json_encode( 
+				[ 
+					'alert_string' => 'Invalid Security Token',
+					'succeed'      => false
+				]
+			);
+			wp_die( '0', 400 );
+		}
+
+		$rec_array = $_POST['slideOrder'];
+		if ( is_array( $rec_array ) && ! empty( $rec_array ) ) {
+			// '-1' slide ID remover.
+			if ( '-1' === $rec_array[ count( $rec_array ) - 1 ] ) {
+				unset( $rec_array[ count( $rec_array ) - 1 ] );
+			} else {
+				$rec_array = array_flip( $rec_array );
+				if ( isset( $rec_array['-1'] ) ) {
+					unset( $rec_array['-1'] );
+				}
+				$rec_array = array_flip( $rec_array );
+			}
+
+			if ( ! $this->key_value_verifier( $rec_array ) ) {
+				echo wp_json_encode(
+					[ 
+						'alert_string' => 'Invalid Data feed',
+						'succeed'      => false
+					]
+				);
+				wp_die( '0', 400 );
+			}
+
+			$table_data = $this->db_slides_fetcher();
+			if ( $this->wpss_garbage_collector( $rec_array, $table_data['slide_order'] ) ) {
+				$this->db_inserter( $rec_array, [ 'slide_end' => $table_data['slide_end'] ] );
+				echo wp_json_encode(
+					[ 
+						'alert_string' => 'Saved!',
+						'succeed'      => true 
+					] 
+				);
+				wp_die( '0', 200 );
+			}
+			echo wp_json_encode(
+				[ 
+					'alert_string' => 'Garbage Collector failed',
+					'succeed'      => false
+				] 
+			);
+			wp_die( '0', 400 );
+		}
+		echo wp_json_encode(
+			[ 
+				'alert_string' => 'Invalid Data Given',
+				'succeed'      => false
+			] 
+		);
+		wp_die( '0', 400 );
+	}
+
+	/**
 	 * Validates data before insertion.
 	 *
 	 * This function validates data before inserting it into the database.
@@ -376,4 +446,19 @@ class Wpss {
 		// Verifier Yet to Program.
 		return true;
 	}
+
+	/**
+	 * Garbage Collector: Deletes images from the Media library for space efficiency.
+	 *
+	 * This function acts as a garbage collector and deletes specific images from the Media library to improve space efficiency.
+	 *
+	 * @param array $new_array An array of IDs that need to be saved; remaining IDs will be deleted.
+	 * @param array $table_array An array of IDs that are saved in the database.
+	 * @return boolean `true` if the operation succeeds; otherwise, `false`.
+	 */
+	public function wpss_garbage_collector( $new_array, $table_array ) {
+		// yet to implement
+		return true;
+	}
+
 }
