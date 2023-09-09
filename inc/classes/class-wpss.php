@@ -443,8 +443,114 @@ class Wpss {
 		if ( ! is_array( $pairs ) ) {
 			return false;
 		}
-		// Verifier Yet to Program.
-		return true;
+		$keys = self::TABLE_KEYS;
+		$keys = array_flip( $keys );
+
+		$error = false;
+		foreach ( $pairs as $key => $value ) {
+			if ( ! isset( $keys[ $key ] ) || $error ) {
+				return ! $error;
+			}
+
+			switch ( $key ) {
+				case 'slide_order':
+					if ( is_array( $value ) ) {
+						if ( empty( $value ) ) {
+							break;
+						}
+						foreach ( $value as $id ) {
+							if ( ! wp_get_attachment_url( $id ) ) {
+								$error = false;
+								break;
+							}
+						}
+					} else {
+						$error = true;
+					}
+					break;
+
+				case 'slide_start':
+				case 'slide_end':
+					if ( ! ( is_numeric( $value ) && ! is_float( $value ) ) ) {
+						$error = true;
+					}
+					break;
+
+				case 'slide_limit':
+				case 'prev_is_sq':
+				case 'web_is_sq':
+					if ( !
+						(
+							is_numeric( $value ) &&
+							! is_float( $value ) &&
+							( 0 === intval( $value ) || 1 === intval( $value ) )
+						)
+					) {
+						$error = true;
+					}
+					break;
+
+				case 'prev_height':
+				case 'prev_width':
+					if ( !
+						(
+							is_numeric( $value ) &&
+							! is_float( $value ) &&
+							( 35 <= intval( $value ) && 250 >= intval( $value ) )
+						)
+					) {
+						$error = true;
+					}
+					break;
+
+				case 'web_height':
+					if ( !
+						(
+							is_numeric( $value ) &&
+							! is_float( $value ) &&
+							( 35 <= intval( $value ) && 1080 >= intval( $value ) )
+						)
+					) {
+						$error = true;
+					}
+					break;
+
+				case 'web_width':
+					if ( !
+						(
+							is_numeric( $value ) &&
+							! is_float( $value ) &&
+							( 35 <= intval( $value ) && 1920 >= intval( $value ) )
+						)
+					) {
+						$error = true;
+					}
+					break;
+
+				case 'prev_h_max':
+				case 'prev_w_max':
+				case 'web_h_max':
+				case 'web_w_max':
+					$error = true; // as these parameters are not allow to modify.
+					break;
+
+				case 'alignment':
+					if ( !
+						(
+							is_numeric( $value ) &&
+							! is_float( $value ) &&
+							( 0 === intval( $value ) || 1 === intval( $value ) || 2 === intval( $value ) )
+						)
+					) {
+						$error = true;
+					}
+					break;
+
+				default:
+					$error = true;
+			}
+		}
+		return ! $error;
 	}
 
 	/**
