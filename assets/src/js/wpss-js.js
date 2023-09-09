@@ -55,68 +55,101 @@
 			ajaxNonce = ajaxData.ajaxNonce;
 		}
 
+		/**
+		 * Makes ajax calls.
+		 * @param {object}           data            : data to be sent via ajax call.
+		 * @param {callableFunction} successCallback : function, executed on successful ajax call.
+		 * @param {callableFunction} failureCallback : function, executed on failed ajax call.
+		 * @param {boolean}          async           : true for asynchronous request.
+		 */
+		function doAjax( data, successCallback = null, failureCallback = null, async = true ) {
+			loaderPlease();
+			$.ajax( {
+				url: ajaxUrl,
+				type: 'post',
+				data: data,
+				success: ( response ) => {
+					if ( successCallback ) {
+						successCallback( response );
+					} else {
+						wpssAlert( response, true );
+					}
+					noMoreLoader();
+				},
+				error: ( response ) => {
+					if ( failureCallback ) {
+						failureCallback( response );
+					} else {
+						if ( response.responseJSON ) {
+							wpssAlert( response.responseJSON, false );
+						} else {
+							wpssAlert( response, false );
+						}
+						setTimeout( () => {
+							location.reload();
+						}, 2600 );
+					}
+					noMoreLoader();
+				},
+				async: async,
+			 } );
+		}
+
 		let ajaxOP;
-		const data = {
+		const ajaxPayload = {
 			action: 'wpss_plugin_settings_fetcher',
 			ajaxNonce: ajaxNonce,
 		};
 
-		$.ajax( {
-			url: ajaxUrl,
-			type: 'post',
-			data: data,
-			success: ( response ) => {
-				ajaxOP = JSON.parse( response );
-				slidesOrder = JSON.parse( ajaxOP.slide_order );
+		/**
+		 * Callback function executed after a successful AJAX request.
+		 *
+		 * @param {JSON} response JSON object containing AJAX data.
+		 */
+		const ajaxSuccessCallback = function ( response ) {
+			wpssAlert( response );
+			ajaxOP = JSON.parse( response );
+			slidesOrder = JSON.parse( ajaxOP.slide_order );
 
-				ajaxOP.slide_end = -1 === parseInt( ajaxOP.slide_end ) ? slidesOrder.length : ajaxOP.slide_end;
-				slidesOrder.push( '-1' );
-				$( '#preview_width' ).val( ajaxOP.prev_width + 'px' );
-				$( '#preview_height' ).val( ajaxOP.prev_height + 'px' );
-				$( '#webview_width' ).val( ajaxOP.web_width + 'px' );
-				$( '#webview_height' ).val( ajaxOP.web_height + 'px' );
-				$( '#slide-range-start' ).val( ajaxOP.slide_start );
-				$( '#slide-range-end' ).val( ajaxOP.slide_end );
-				ajaxOP.prev_height = '1' === ajaxOP.prev_is_sq ? ajaxOP.prev_width : ajaxOP.prev_height;
-				$( '.img-holder' ).css( 'height', ajaxOP.prev_height );
-				$( '.img-holder' ).css( 'width', ajaxOP.prev_width );
+			ajaxOP.slide_end = -1 === parseInt( ajaxOP.slide_end ) ? slidesOrder.length : ajaxOP.slide_end;
+			slidesOrder.push( '-1' );
+			$( '#preview_width' ).val( ajaxOP.prev_width + 'px' );
+			$( '#preview_height' ).val( ajaxOP.prev_height + 'px' );
+			$( '#webview_width' ).val( ajaxOP.web_width + 'px' );
+			$( '#webview_height' ).val( ajaxOP.web_height + 'px' );
+			$( '#slide-range-start' ).val( ajaxOP.slide_start );
+			$( '#slide-range-end' ).val( ajaxOP.slide_end );
+			ajaxOP.prev_height = '1' === ajaxOP.prev_is_sq ? ajaxOP.prev_width : ajaxOP.prev_height;
+			$( '.img-holder' ).css( 'height', ajaxOP.prev_height );
+			$( '.img-holder' ).css( 'width', ajaxOP.prev_width );
 
-				settings.slide_limit = ajaxOP.slide_limit;
-				settings.prev_is_sq = ajaxOP.prev_is_sq;
-				settings.web_is_sq = ajaxOP.web_is_sq;
-				settings.alignment = ajaxOP.alignment;
-				settings.slide_start = ajaxOP.slide_start;
-				settings.slide_end = ajaxOP.slide_end;
-				settings.prev_height = ajaxOP.prev_height;
-				settings.prev_width = ajaxOP.prev_width;
-				settings.web_height = ajaxOP.web_height;
-				settings.web_width = ajaxOP.web_width;
-			},
-			error: ( response ) => {
-				// doing it later
-			},
-			async: true,
-		} );
+			settings.slide_limit = ajaxOP.slide_limit;
+			settings.prev_is_sq = ajaxOP.prev_is_sq;
+			settings.web_is_sq = ajaxOP.web_is_sq;
+			settings.alignment = ajaxOP.alignment;
+			settings.slide_start = ajaxOP.slide_start;
+			settings.slide_end = ajaxOP.slide_end;
+			settings.prev_height = ajaxOP.prev_height;
+			settings.prev_width = ajaxOP.prev_width;
+			settings.web_height = ajaxOP.web_height;
+			settings.web_width = ajaxOP.web_width;
+			if ( $( '#accordion' ).hasClass( 'dp-none' ) ) {
+				$( '#accordion' ).removeClass( 'dp-none' );
+			}
+		};
+		doAjax( ajaxPayload, ajaxSuccessCallback, null, false );
 
+
+		// Settings Saver.
 		$( '#save-settings' ).on( 'click', function() {
 			const settingSaverPayload = {
 				action: 'wpss_plugin_settings_setter',
 				ajaxNonce: ajaxNonce,
 				wpss_settings: settings,
 			};
-			$.ajax( {
-				url: ajaxUrl,
-				type: 'post',
-				data: settingSaverPayload,
-				success: ( response ) => {
-					// do it later
-				},
-				error: ( response ) => {
-					// doing it later
-				},
-				async: true,
-			} );
+			doAjax( settingSaverPayload );
 		} );
+
 
 		// rearrange submit button
 		$( '#wpss-rearrange' ).on( 'click', function() {
@@ -125,18 +158,8 @@
 				ajaxNonce: ajaxNonce,
 				slideOrder: slidesOrder,
 			};
-			$.ajax( {
-				url: ajaxUrl,
-				type: 'post',
-				data: wpssSlideRearrange,
-				success: ( response ) => {
-					console.log('Rearrange Succeed');
-				},
-				error: ( response ) => {
-					// doing it later
-				},
-				async: true,
-			} );
+
+			doAjax( wpssSlideRearrange );
 		} );
 
 		// End of Ajax
