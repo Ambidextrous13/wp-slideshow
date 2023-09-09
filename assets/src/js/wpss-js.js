@@ -39,6 +39,7 @@
 			iconPosition: 'end',
 		} );
 
+
 		// Ajax Calls
 
 		// eslint-disable-next-line no-undef
@@ -117,6 +118,28 @@
 			} );
 		} );
 
+		// rearrange submit button
+		$( '#wpss-rearrange' ).on( 'click', function() {
+			const wpssSlideRearrange = {
+				action: 'wpss_plugin_slide_rearrange',
+				ajaxNonce: ajaxNonce,
+				slideOrder: slidesOrder,
+			};
+			$.ajax( {
+				url: ajaxUrl,
+				type: 'post',
+				data: wpssSlideRearrange,
+				success: ( response ) => {
+					console.log('Rearrange Succeed');
+				},
+				error: ( response ) => {
+					// doing it later
+				},
+				async: true,
+			} );
+		} );
+
+		// End of Ajax
 
 		// disable upload button
 		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
@@ -189,6 +212,43 @@
 			}
 		} );
 
+		/**
+		 * Creates sliders.
+		 * @param {string}         selector CSS selector to select an HTML element for slider.
+		 * @param {string|boolean} range    'min', 'max' or true. A min range goes from the slider min to one handle. A max range goes from one handle to the slider max. true for both open end.
+		 * @param {int}            value    Determines the value of the slider.
+		 * @param {int}            max      The maximum value of the slider. Default: 100.
+		 * @param {int}            min      The minimum value of the slider.
+		 * @param {callback}       slide    Triggered after the user slides a handle, if the value has changed.
+		 * @param {callback}       change   Triggered on every mouse move during slide.
+		 */
+		function sliderBuilder( selector, range, value, max, min = 0, slide = null, change = null ) {
+			const args = {
+				range: range,
+				max: parseInt( max ),
+				min: parseInt( min ),
+			};
+			if ( Array.isArray( value ) ) {
+				args.values = value;
+			} else {
+				args.value = value;
+			}
+			if ( null !== slide ) {
+				args.slide = ( event, ui ) => {
+					slide( ui );
+				};
+			}
+			if ( null !== change ) {
+				args.change = ( event, ui ) => {
+					change( ui );
+				};
+			} else {
+				args.change = ( event ) => {
+					$( '#wpss-settings' ).trigger( 'change', [ event ] );
+				};
+			}
+			$( selector ).slider( args );
+		}
 
 		$( "#slider_width_wv" ).slider({
 			range: "min",
