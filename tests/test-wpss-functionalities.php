@@ -178,5 +178,26 @@ class WpssTest extends TestCase {
         $this->assertTrue( $assert_arg );
     }
 
+	public function test_wpss_class_slides_rearrange() {
+        // echo '12';
+        $nonce  = wp_create_nonce( 'pointBreak' );
+
+        $_POST['ajaxNonce']    = $nonce;
+        $_REQUEST['ajaxNonce'] = $nonce;
+
+        $db_data = $this->wpss->db_slides_fetcher();
+        
+        $first_slide  = $db_data['slide_order'][0];
+        $second_slide = $db_data['slide_order'][1];
+
+        $db_data['slide_order'][0] = $second_slide;
+        $db_data['slide_order'][1] = $first_slide;
+        $db_data['slide_order'][]  = '-1';
+
+        $_POST['slideOrder'] = $db_data['slide_order'];
+        $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_slide_rearrange' );
+        $this->assertTrue( $response[ 'succeed' ] );
+    }
+
 }
 ?>
