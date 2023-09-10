@@ -179,7 +179,6 @@ class WpssTest extends TestCase {
     }
 
 	public function test_wpss_class_slides_rearrange() {
-        // echo '12';
         $nonce  = wp_create_nonce( 'pointBreak' );
 
         $_POST['ajaxNonce']    = $nonce;
@@ -197,6 +196,47 @@ class WpssTest extends TestCase {
         $_POST['slideOrder'] = $db_data['slide_order'];
         $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_slide_rearrange' );
         $this->assertTrue( $response[ 'succeed' ] );
+    }
+
+	public function test_key_value_verifier_valid_data() {
+        $valid_data = [
+            'slide_order' => [1, 2, 3],
+            'slide_start' => 1,
+            'slide_end' => 3,
+            'alignment' => 0,
+        ];
+
+        $result = $this->wpss->key_value_verifier($valid_data);
+        $this->assertTrue($result);
+
+        $invalid_data = [
+            'slide_order' => [ 99, 163, 22 ],
+            'slide_start' => 55,
+            'slide_end'   => 22,
+            'alignment'   => 4,
+            'slide_limit' => 0,
+            'prev_height' => -200,
+            'prev_width'  => 145.33,
+            'prev_is_sq'  => true,
+            'prev_h_max'  => 1234,
+            'prev_w_max'  => 4321,
+            'web_height'  => 0,
+            'web_width'   => 0,
+            'web_is_sq'   => 33,
+            'web_h_max'   => -11,
+            'web_w_max'   => -18,
+        ];
+
+        $result = $this->wpss->key_value_verifier($invalid_data);
+        $this->assertFalse($result);
+
+        $db_data = $this->wpss->db_slides_fetcher( true );        
+        $assert_arg = false;
+        foreach ( $invalid_data as $key => $value ) {
+            $assert_arg = $assert_arg || $db_data[ $key ] === $value;
+        }
+
+        $this->assertFalse( $assert_arg );
     }
 
 }
