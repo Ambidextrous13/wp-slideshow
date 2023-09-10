@@ -563,7 +563,25 @@ class Wpss {
 	 * @return boolean `true` if the operation succeeds; otherwise, `false`.
 	 */
 	public function wpss_garbage_collector( $new_array, $table_array ) {
-		// yet to implement
+		$easy_arr = array_flip( $table_array );
+		if ( count( $new_array ) ) {
+			foreach ( $new_array as $attachment_id ) {
+				if ( isset( $easy_arr[ $attachment_id ] ) ) {
+					unset( $easy_arr[ $attachment_id ] );
+				} else {
+					return false;
+				}
+			}
+		}
+		if ( count( $easy_arr ) ) {
+			foreach ( $easy_arr as $attachment_id => $sr_no ) {
+				if ( wp_attachment_is( 'image', $attachment_id ) ) {
+					wp_delete_attachment( $attachment_id );
+				} else {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
