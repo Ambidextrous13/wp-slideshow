@@ -239,5 +239,19 @@ class WpssTest extends TestCase {
         $this->assertFalse( $assert_arg );
     }
 
+	public function test_wpss_class_wpss_garbage_collector() {
+        $db_data     = $this->wpss->db_slides_fetcher();
+        $table_array = $db_data['slide_order'];
+        $arr_len     = count( $table_array );
+        $deleted_id  = $table_array[ $arr_len - 1 ];
+        
+        $new_array = $table_array;
+        unset( $new_array[ $arr_len - 1 ] );
+
+        $this->assertTrue( false !== wp_get_attachment_url( $deleted_id ) );
+        $this->wpss->wpss_garbage_collector( $new_array, $table_array );
+        $this->assertFalse( wp_get_attachment_url( $deleted_id ) );
+    }
+
 }
 ?>
