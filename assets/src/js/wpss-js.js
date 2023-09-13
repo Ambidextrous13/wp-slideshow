@@ -1,47 +1,6 @@
 ( function ( $ ) {
 	$( document ).ready( function () {
 
-		// Locals
-		const settings = {
-			slide_start: null,
-			slide_end: null,
-			slide_limit: null,
-			prev_height: null,
-			prev_width: null,
-			prev_is_sq: null,
-			web_height: null,
-			web_width: null,
-			web_is_sq: null,
-			alignment: null,
-		};
-
-		$( '.img-holder' ).css( 'height', 120 );
-		$( '.img-holder' ).css( 'width', 120 );
-
-		$( 'input[type="radio"]' ).checkboxradio();
-		$( document ).tooltip();
-
-		$( "#upload" ).button({
-			icon: "ui-icon-arrowthickstop-1-n",
-			iconPosition: "end"	
-		});
-
-		$( "#sortable" ).sortable({
-			revert: true,
-			tolerance: "pointer",
-			cursor: "grab"
-		});
-
-		$( "#sortable" ).disableSelection();
-
-		$( '#upload' ).button( {
-			icon: 'ui-icon-arrowthickstop-1-n',
-			iconPosition: 'end',
-		} );
-
-
-		// Ajax Calls
-
 		// eslint-disable-next-line no-undef
 		let ajaxUrl;
 		// eslint-disable-next-line no-undef
@@ -95,6 +54,203 @@
 			 } );
 		}
 
+		/**
+		 * Activates the loading Animation.
+		 */
+		function loaderPlease() {
+			if ( 0 === $( '#wpss-loading' ).length ) {
+				let loaderHtml = '<div id="wpss-loading"> <div class="lds-spinner">';
+				let i = 0;
+				for ( i; 12 > i; i++ ) {
+					loaderHtml += '<div></div>';
+				}
+				$( loaderHtml ).insertBefore( '#accordion' );
+			}
+		}
+
+		/**
+		 * deactivates the loading Animation.
+		 */
+		function noMoreLoader() {
+			while ( 0 !== $( '#wpss-loading' ).length ) {
+				$( '#wpss-loading' ).remove();
+			}
+		}
+		/**
+		 * Displays an error message based on the 'alert_string' key's value in the response JSON.
+		 *
+		 * @param {JSON}    response The response JSON received from Ajax.
+		 * @param {boolean} succeed  True for a green alert, false for a red alert.
+		 */
+		function wpssAlert ( response, succeed ) {
+			if ( response.alert_string || response.data?.alert_string ) {
+				let alert = response.alert_string ? response.alert_string : response.data.alert_string;
+				alert = succeed ? alert : alert + '.  Reloading...';
+				$( '#wpss-main-alert-text' ).html( alert );
+				if ( succeed ) {
+					$( '#wpss-main-alert' ).addClass( 'wpss-alerts-green' );
+				} else {
+					$( '#wpss-main-alert' ).addClass( 'wpss-alerts-red' );
+				}
+				if ( $( '#wpss-main-alert' ).hasClass( 'dp-none' ) ) {
+					$( '#wpss-main-alert' ).removeClass( 'dp-none' );
+				}
+				setTimeout( () => {
+					if ( $( '#wpss-main-alert' ).hasClass( 'wpss-alerts-green' ) ) {
+						$( '#wpss-main-alert' ).removeClass( 'wpss-alerts-green' );
+					} else if ( $( '#wpss-main-alert' ).hasClass( 'wpss-alerts-red' ) ) {
+						$( '#wpss-main-alert' ).removeClass( 'wpss-alerts-red' );
+					}
+					$( '#wpss-main-alert' ).addClass( 'dp-none' );
+				}, 2500 );
+			}
+		}
+		// styles
+		$( 'input[type="radio"]' ).checkboxradio();
+		$( document ).tooltip();
+		$( '#upload' ).button( {
+			icon: 'ui-icon-arrowthickstop-1-n',
+			iconPosition: 'end',
+		} );
+
+		// disable upload button
+		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
+		$( '#wpss-files' ).on( 'change', ( event ) => {
+			const target = event.target;
+			if ( target.files?.length ) {
+				$( '#upload' ).prop( 'disabled', false ).removeAttr( 'title' );
+			} else {
+				$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
+			}
+		} );
+		$( '#upload' ).on( 'click', function () {
+			loaderPlease();
+		} );
+
+		// Globals
+		let slidesOrder = [];
+		const settings = {
+			slide_start: null,
+			slide_end: null,
+			slide_limit: null,
+			prev_height: null,
+			prev_width: null,
+			prev_is_sq: null,
+			web_height: null,
+			web_width: null,
+			web_is_sq: null,
+			alignment: null,
+		};
+
+		// delete button
+		$( '.slide-delete' ).each( function() {
+			$( this ).on( 'click', function() {
+				const parent = $( this ).parent();
+				$( parent ).css( 'border', '2px solid red' );
+				$( '#slide-delete-buttons' ).append( '<button id="slide-confirm-delete" class="slide-delete-button">Confirm</button>' );
+
+				$( '#slide-confirm-delete' ).on( 'click', function() {
+					parent.remove();
+					$( '#delete-dialogue' ).addClass( 'dp-none' );
+					$( '#slide-confirm-delete' ).remove();
+					$( parent ).css( 'border', 'none' );
+					$( '#sortable' ).trigger( 'sortupdate' );
+					if ( parseInt( ajaxOP.slide_end ) >= slidesOrder.length ) {
+						$( '#slider-range' ).slider( 'destroy' );
+						sliderBuilder( '#slider-range', true, [ parseInt( ajaxOP.slide_start ), slidesOrder.length - 1 ], slidesOrder.length - 1, 1, slideRangeCallback );
+						$( '#slide-range-end' ).val( slidesOrder.length - 1 );
+					} else {
+						$( '#slider-range' ).slider( 'destroy' );
+						sliderBuilder( '#slider-range', true, [ parseInt( ajaxOP.slide_start ), parseInt( ajaxOP.slide_end ) ], slidesOrder.length - 1, 1, slideRangeCallback );
+					}
+				} );
+
+				$( '#slide-cancel-delete' ).on( 'click', function() {
+					$( '#slide-confirm-delete' ).remove();
+					$( '#delete-dialogue' ).addClass( 'dp-none' );
+					$( parent ).css( 'border', 'none' );
+				} );
+				$( '#delete-dialogue' ).removeClass( 'dp-none' );
+			} );
+		} );
+
+		// rearrange submit button
+		$( '#wpss-rearrange' ).on( 'click', function() {
+			const wpssSlideRearrange = {
+				action: 'wpss_plugin_slide_rearrange',
+				ajaxNonce: ajaxNonce,
+				slideOrder: slidesOrder,
+			};
+
+			doAjax( wpssSlideRearrange );
+		} );
+
+		// sortable settings
+		$( '#sortable' ).sortable( {
+			revert: true,
+			tolerance: 'pointer',
+			cursor: 'grab',
+		} );
+		$( '#sortable' ).disableSelection();
+		$( '#sortable' ).on( 'sortupdate', function() {
+			slidesOrder = $( '#sortable' ).sortable(
+				'toArray',
+				{
+					key: 'sort',
+					attribute: 'data',
+				}
+			);
+			slidesOrder.push( '-1' );
+		} );
+
+		// accordion settings
+		$( '#accordion' ).accordion( {
+			heightStyle: 'content',
+			collapsible: true,
+			active: 1,
+			icons: { header: 'ui-icon-plus', activeHeader: 'ui-icon-minus' },
+		} );
+
+		// sliders
+		/**
+		 * Creates sliders.
+		 * @param {string}         selector CSS selector to select an HTML element for slider.
+		 * @param {string|boolean} range    'min', 'max' or true. A min range goes from the slider min to one handle. A max range goes from one handle to the slider max. true for both open end.
+		 * @param {int}            value    Determines the value of the slider.
+		 * @param {int}            max      The maximum value of the slider. Default: 100.
+		 * @param {int}            min      The minimum value of the slider.
+		 * @param {callback}       slide    Triggered after the user slides a handle, if the value has changed.
+		 * @param {callback}       change   Triggered on every mouse move during slide.
+		 */
+		function sliderBuilder( selector, range, value, max, min = 0, slide = null, change = null ) {
+			const args = {
+				range: range,
+				max: parseInt( max ),
+				min: parseInt( min ),
+			};
+			if ( Array.isArray( value ) ) {
+				args.values = value;
+			} else {
+				args.value = value;
+			}
+			if ( null !== slide ) {
+				args.slide = ( event, ui ) => {
+					slide( ui );
+				};
+			}
+			if ( null !== change ) {
+				args.change = ( event, ui ) => {
+					change( ui );
+				};
+			} else {
+				args.change = ( event ) => {
+					$( '#wpss_settings' ).trigger( 'change', [ event ] );
+				};
+			}
+			$( selector ).slider( args );
+		}
+
+		//Ajax request
 		let ajaxOP;
 		const ajaxPayload = {
 			action: 'wpss_plugin_settings_fetcher',
@@ -137,217 +293,81 @@
 				$( '#accordion' ).removeClass( 'dp-none' );
 			}
 		};
+
 		doAjax( ajaxPayload, ajaxSuccessCallback, null, false );
 
-
-		// Settings Saver.
-		$( '#save-settings' ).on( 'click', function() {
-			const settingSaverPayload = {
-				action: 'wpss_plugin_settings_setter',
-				ajaxNonce: ajaxNonce,
-				wpss_settings: settings,
-			};
-			doAjax( settingSaverPayload );
-		} );
-
-
-		// rearrange submit button
-		$( '#wpss-rearrange' ).on( 'click', function() {
-			const wpssSlideRearrange = {
-				action: 'wpss_plugin_slide_rearrange',
-				ajaxNonce: ajaxNonce,
-				slideOrder: slidesOrder,
-			};
-
-			doAjax( wpssSlideRearrange );
-		} );
-
-		// End of Ajax
-
-		// disable upload button
-		$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
-		$( '#wpss-files' ).on( 'change', ( event ) => {
-			const target = event.target;
-			if ( target.files?.length ) {
-				$( '#upload' ).prop( 'disabled', false ).removeAttr( 'title' );
-			} else {
-				$( '#upload' ).prop( 'disabled', true ).attr( 'title', 'Please select file(s) to upload' );
-			}
-		} );
-		
-		$( "#sortable" ).on( "sortupdate", function( event, ui ) {
-			console.log(
-				$( "#sortable" ).sortable(
-					"serialize",
-					{ 
-						key: "sort",
-						attribute: "data"
-					}
-				)
-			);
-		} );
-
-		$( "#accordion" ).accordion({
-			heightStyle: "content",
-			collapsible: true,
-			active: 1,
-			icons: { "header": "ui-icon-plus", "activeHeader": "ui-icon-minus" }
-		});
-		var max_width = $( window ).width();
-		var max_height = $( window ).height();
-
-		$( "#slider_width" ).slider({
-			range: "min",
-			value: 50,
-			min: 1,
-			max: max_width/3,
-			slide: function( event, ui ) {
-				$( '.img-holder' ).css( 'width', ui.value );
-				$( "#preview_width" ).val( ui.value + 'px' );
-			},
-		});
-
-		$( "#preview_width" ).val( $( "#slider_width" ).slider( "value" ) + 'px' );
-		
-		$preview_shape = '';
-
-		$( '#settings' ).on( 'change', function() {
-			$preview_shape = $('input[name=radio-shape]:checked', '#settings').val();
-			if ( $preview_shape == '0'  ) {
-				$( '#preview_height_enc' ).removeClass( 'dp-none' );
-				$( "#slider_height" ).slider({
-					range: "min",
-					value: 50,
-					min: 1,
-					max: max_height/5,
-					change: function( event, ui ) {
-						$( '.img-holder' ).css( 'height', ui.value );
-					},
-					slide: function( event, ui ) {
-						$( "#preview_height" ).val( ui.value + 'px' );
-					}
-				});
-				$( "#preview_height" ).val( $( "#slider_height" ).slider( "value" ) + 'px' );
-			} else {
-				if( ! $( '#preview_height_enc' ).hasClass( 'dp-none' ) ){
-					$( '#preview_height_enc' ).addClass( 'dp-none' );
-				}
-			}
-		} );
+		// Callbacks for Sliders
 
 		/**
-		 * Creates sliders.
-		 * @param {string}         selector CSS selector to select an HTML element for slider.
-		 * @param {string|boolean} range    'min', 'max' or true. A min range goes from the slider min to one handle. A max range goes from one handle to the slider max. true for both open end.
-		 * @param {int}            value    Determines the value of the slider.
-		 * @param {int}            max      The maximum value of the slider. Default: 100.
-		 * @param {int}            min      The minimum value of the slider.
-		 * @param {callback}       slide    Triggered after the user slides a handle, if the value has changed.
-		 * @param {callback}       change   Triggered on every mouse move during slide.
+		 * callback for preview width slider.
+		 * @param {object} ui jQuery returned object.
 		 */
-		function sliderBuilder( selector, range, value, max, min = 0, slide = null, change = null ) {
-			const args = {
-				range: range,
-				max: parseInt( max ),
-				min: parseInt( min ),
-			};
-			if ( Array.isArray( value ) ) {
-				args.values = value;
-			} else {
-				args.value = value;
+		const previewWidthCallback = function ( ui ) {
+			$( '.img-holder' ).css( 'width', ui.value );
+			if ( '1' === settings.prev_is_sq ) {
+				$( '.img-holder' ).css( 'height', ui.value );
+				settings.prev_height = ui.value.toString();
 			}
-			if ( null !== slide ) {
-				args.slide = ( event, ui ) => {
-					slide( ui );
-				};
-			}
-			if ( null !== change ) {
-				args.change = ( event, ui ) => {
-					change( ui );
-				};
-			} else {
-				args.change = ( event ) => {
-					$( '#wpss-settings' ).trigger( 'change', [ event ] );
-				};
-			}
-			$( selector ).slider( args );
-		}
+			$( '#preview_width' ).val( ui.value + 'px' );
+			settings.prev_width = ui.value.toString();
+		};
 
-		$( "#slider_width_wv" ).slider({
-			range: "min",
-			value: 50,
-			min: 1,
-			max: max_width/3,
-			change: function( event, ui ) {
-				// db save
-			},
-			slide: function( event, ui ) {
-				$( "#webview_width" ).val( ui.value + 'px' );
-			}
-		});
+		/**
+		 * callback for preview height slider.
+		 * @param {object} ui jQuery returned object.
+		 */
+		const previewHeightCallback = function ( ui ) {
+			$( '.img-holder' ).css( 'height', ui.value );
+			$( '#preview_height' ).val( ui.value + 'px' );
+			settings.prev_height = ui.value.toString();
+		};
+		sliderBuilder( '#slider_width', 'min', ajaxOP.prev_width, ajaxOP.prev_w_max, 35, previewWidthCallback );
+		sliderBuilder( '#slider_height', 'min', ajaxOP.prev_height, ajaxOP.prev_h_max, 35, previewHeightCallback );
 
-		$( "#webview_width" ).val( $( "#slider_width" ).slider( "value" ) + 'px' );
-		
-		var webview_shape = '';
+		/**
+		 * callback for web view width slider.
+		 * @param {object} ui jQuery returned object.
+		 */
+		const previewWidthWVCallback = function ( ui ) {
+			$( '#webview_width' ).val( ui.value + 'px' );
+			settings.web_width = ui.value.toString();
+		};
 
-		$( '#settings' ).on( 'change', function() {
-			webview_shape = $('input[name=radio-shape-wv]:checked', '#settings').val();
-			if ( webview_shape == '0'  ) {
-				$( '#webview_height_enc' ).removeClass( 'dp-none' );
-				$( "#slider_height_wv" ).slider({
-					range: "min",
-					value: 50,
-					min: 1,
-					max: max_height/5,
-					change: function( event, ui ) {
-						// db save
-					},
-					slide: function( event, ui ) {
-						$( "#webview_height" ).val( ui.value + 'px' );
-					}
-				});
-				$( "#webview_height" ).val( $( "#slider_height_wv" ).slider( "value" ) + 'px' );
-			} else {
-				if( ! $( '#webview_height_enc' ).hasClass( 'dp-none' ) ){
-					$( '#webview_height_enc' ).addClass( 'dp-none' );
-				}
-			}
-		} );
+		/**
+		 * callback for web view height slider.
+		 * @param {object} ui jQuery returned object.
+		 */
+		const previewHeightWVCallback = function ( ui ) {
+			$( '#webview_height' ).val( ui.value + 'px' );
+			settings.web_height = ui.value.toString();
+		};
+		sliderBuilder( '#slider_width_wv', 'min', ajaxOP.web_width, ajaxOP.web_w_max, 80, previewWidthWVCallback );
+		sliderBuilder( '#slider_height_wv', 'min', ajaxOP.web_height, ajaxOP.web_h_max, 80, previewHeightWVCallback );
 
-		$( "#slider-range" ).slider({
-			range: true,
-			min: 0,
-			max: 500,
-			values: [ 75, 300 ],
-			slide: function( event, ui ) {
-				$( "#slide-range" ).val( "Start: " + ui.values[ 0 ] + " - Stop: " + ui.values[ 1 ] );
-			}
-		});
-		$( "#slide-range" ).val( "Start: " + $( "#slider-range" ).slider( "values", 0 ) +" - Stop: " + $( "#slider-range" ).slider( "values", 1 ) );
+		/**
+		 * callback for slide' range slider.
+		 * @param {object} ui jQuery returned object.
+		 */
+		const slideRangeCallback = function ( ui ) {
+			$( '#slide-range-start' ).val( ui.values[ 0 ] );
+			$( '#slide-range-end' ).val( ui.values[ 1 ] );
+			settings.slide_start = ui.values[ 0 ].toString();
+			settings.slide_end = ui.values[ 1 ].toString();
+		};
 
-		var range_enable =  '';
-		$( '#settings' ).on( 'change', function() {
-			range_enable = $('input[name=radio-slide-limit]:checked', '#settings').val();
-			if ( range_enable == '1' ) {
-				if( $( '#slide-range-set' ).hasClass( 'dp-none' ) ){
-					$( '#slide-range-set' ).removeClass( 'dp-none' );
-				}
-			}else if ( range_enable == '0' ) {
-				if( ! $( '#slide-range-set' ).hasClass( 'dp-none' ) ){
-					$( '#slide-range-set' ).addClass( 'dp-none' );
-				}
-			}
-		} );
+		sliderBuilder( '#slider-range', true, [ parseInt( ajaxOP.slide_start ), parseInt( ajaxOP.slide_end ) ], slidesOrder.length - 1, 1, slideRangeCallback );
 
+		// Settings change event listener
 		let previewShape = settings.prev_is_sq;
 		let webviewShape = settings.web_is_sq;
 		let rangeEnable = settings.slide_limit;
 		let slideAlignment = settings.alignment;
-		$( '#wpss-settings' ).on( 'change', function() {
-			previewShape = $( 'input[name=radio-shape]:checked', '#wpss-settings' ).val();
-			webviewShape = $( 'input[name=radio-shape-wv]:checked', '#wpss-settings' ).val();
-			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss-settings' ).val();
-			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss-settings' ).val();
+
+		$( '#wpss_settings' ).on( 'change', function() {
+			previewShape = $( 'input[name=radio-shape]:checked', '#wpss_settings' ).val();
+			webviewShape = $( 'input[name=radio-shape-wv]:checked', '#wpss_settings' ).val();
+			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss_settings' ).val();
+			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss_settings' ).val();
 
 			if ( '0' === previewShape && $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
 				$( '#preview_height_enc' ).removeClass( 'dp-none' );
@@ -384,6 +404,22 @@
 				settings.alignment = '2';
 			}
 		} );
-		$( '#wpss-settings' ).trigger( 'change' );
+		$( '#wpss_settings' ).trigger( 'change' );
+
+		// Settings Saver.
+		$( '#save-settings' ).on( 'click', function() {
+			const settingSaverPayload = {
+				action: 'wpss_plugin_settings_setter',
+				ajaxNonce: ajaxNonce,
+				wpss_settings: settings,
+			};
+			doAjax( settingSaverPayload );
+		} );
+
+		// Reset Buttons.
+		$( '#wpss-reset,#reset-settings' ).on( 'click', function() {
+			location.reload();
+
+		} );
 	} );
 }( jQuery ) );
