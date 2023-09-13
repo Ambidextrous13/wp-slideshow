@@ -6,6 +6,10 @@
  * @author t0nystark <https://profiles.wordpress.org/t0nystark/>
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use WPSS\Inc\Classes\Wpss;
 
 define( 'WPSS_PLUGIN_PATH', dirname( __DIR__ ) . '/' );
@@ -13,7 +17,7 @@ define( 'WPSS_PLUGIN_SRC_URL', plugin_dir_url( WPSS_PLUGIN_PATH . 'assets/src/cs
 
 /**
  * Autoloader for class files.
-*/
+ */
 require_once WPSS_PLUGIN_PATH . 'inc/helper/autoloader.php';
 
 register_activation_hook( WPSS_PLUGIN_PATH . 'wp-slideshow.php', 'create_the_wpss_plugin_data_table' );
@@ -22,9 +26,9 @@ $global_wpss_class_instance = new Wpss();
 
 /**
  * Creates a database table upon activation of the plugin.
-*
-* @return void
-*/
+ *
+ * @return void
+ */
 function create_the_wpss_plugin_data_table() {
 	global $wpdb;
 	$charset_collate = $wpdb->get_charset_collate();
@@ -74,9 +78,15 @@ function create_the_wpss_plugin_data_table() {
 }
 
 add_action( 'admin_enqueue_scripts', 'wpss_assets_enqueuer_admin' );
+add_action( 'wp_enqueue_scripts', 'wpss_front_end_assets_enqueuer' );
 add_action( 'wp_ajax_wpss_plugin_settings_fetcher', [ $global_wpss_class_instance, 'fetch_settings' ] );
 add_action( 'wp_ajax_wpss_plugin_settings_setter', [ $global_wpss_class_instance, 'settings_saver' ] );
 add_action( 'wp_ajax_wpss_plugin_slide_rearrange', [ $global_wpss_class_instance, 'slides_rearrange' ] );
+
+/**
+ * Adds slideshow.
+ */
+add_shortcode( 'WPSS_SlideShow', [ $global_wpss_class_instance, 'frontend_hero' ] );
 
 /**
  * Handles the plugin's admin menu assets enqueueing process.
@@ -103,4 +113,14 @@ function wpss_assets_enqueuer_admin() {
 			]
 		);
 	}
+}
+
+/**
+ * Handles the plugin's front end assets enqueueing process.
+ *
+ * @return void
+ */
+function wpss_front_end_assets_enqueuer() {
+	wp_enqueue_script( 'wpss-slider', WPSS_PLUGIN_SRC_URL . 'js/PBslider.js', [ 'jquery' ], '1.0', true );
+	wp_enqueue_style( 'wpss-slider', WPSS_PLUGIN_SRC_URL . 'css/wpss-front-end-style.css', [], '1.0' );
 }
