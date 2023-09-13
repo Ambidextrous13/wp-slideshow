@@ -1,45 +1,67 @@
-.slides-container{
+#accordion {
+	margin: 20px 20px 20px 0;
+}
+.slides-container {
 	display: flex;
 	flex-wrap: wrap;
 	overflow-y: scroll;
 	max-height: 85vh;
 }
-.img-holder{
+.img-holder {
 	margin: 10px 10px 10px 0;
 	position: relative;
 }
-.dp-none{
-	display: none;
+/* stylelint-disable */
+.dp-none {
+	display: none !important; /* Otherwise it will be override by WordPress CSS */
 }
-fieldset{
-	width: 30vw;
+/* stylelint-enable */
+button:hover {
+	border: 1px solid #003eff;
+	background: #007fff;
+	font-weight: 400;
+	color: #fff;
+}
+fieldset {
 	border: none;
 	padding: 20px 10px;
+	margin: 0 15px;
+	width: fit-content;
 }
-legend{
+legend {
 	font-size: 24px;
-	font-weight: bold;
+	font-weight: 700;
 	padding: 30px 0 0;
 }
-#settings{
+#wpss-settings,
+.slide-range-info {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: flex-start;
 }
-.slider{
-	margin: 8px 0px;
+.setting {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0 0.12vw;
+	min-height: 110px;
 }
-.accordion-heading{
+.slider {
+	margin: 8px 0;
+}
+.accordion-heading {
 	font-size: 32;
 	font-weight: 600;
 	letter-spacing: 1px;
 }
-.slide-img{
+.slide-img {
 	width: 100%;
 	height: 100%;
 }
-.slide-delete{
-	background-color: beige;
-	background-image: url( '../images/trash-solid.svg' );
+.slide-delete {
+	background-color: #f5f5dc;
+	background-image: url("../images/trash-solid.svg");
 	background-size: 15px;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -51,58 +73,171 @@ legend{
 	top: 5px;
 	right: 5px;
 }
-#wpss-form{
-	position: relative;
-}
-#delete-dialogue{
-	background-color: white;
+#delete-dialogue {
+	background-color: #fff;
 	position: absolute;
 	top: 30%;
 	left: 35%;
 	width: 30%;
 	height: 30%;
 	padding: 2%;
-	border: 2px solid black;
-	font-weight: bold;
+	border: 2px solid #000;
+	font-weight: 700;
 }
-.delete-caution{
+.delete-caution {
 	background-color: #f6931f;
 	display: flex;
 	align-items: center;
 	height: 30%;
 }
-.caution-logo{
-	background-image: url( '../images/triangle-exclamation-solid.svg' );
+.caution-logo {
+	background-image: url("../images/triangle-exclamation-solid.svg");
 	background-position: center;
 	background-repeat: no-repeat;
 	width: 5%;
 	padding: 4% 5%;
 }
-.caution-text{
+.caution-text {
 	width: 66%;
 	text-align: center;
 	font-weight: 600;
 	font-size: 32px;
 
 }
-.delete-maintext{
+.delete-maintext {
 	height: 33%;
 	font-size: 28px;
 	letter-spacing: 2%;
 	text-align: center;
 	vertical-align: middle;
-	background-color: white;
+	background-color: #fff;
 	margin: 0;
 	padding: 3%;
 }
-#slide-delete-buttons{
+#slide-delete-buttons {
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-evenly;
 	width: 100%;
 	height: 20%;
 }
-.slide-delete-button{
+.slide-delete-button {
 	width: 40%;
 	height: 100%;
+}
+.wpss-alerts-red {
+	width: 98%;
+	border: #f31c1c;
+	background-color: #f31c1cd3;
+	padding: 5px;
+	margin: 5px 0 10px;
+}
+.wpss-alerts-green {
+	width: 98%;
+	border: #015501;
+	background-color: #015501d3;
+	padding: 5px;
+	margin: 5px 0 10px;
+}
+.wpss-alerts p {
+	color: #fff;
+	font-size: 18px;
+	text-align: center;
+}
+input {
+	max-width: 8vw;
+}
+.sbt-setting-btn {
+	height: 30px;
+	padding: 3px 8px;
+}
+
+#wpss-loading {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: 10vh;
+	left: 0;
+	width: 99%;
+	height: 80vh;
+	z-index: 2;
+}
+
+.lds-spinner {
+	display: inline-block;
+	height: 100px;
+	width: 100px;
+	margin: 25px;
+}
+.lds-spinner div {
+	transform-origin: 50px 50px;
+	animation: lds-spinner 1.2s linear infinite;
+}
+.lds-spinner div::after {
+	content: " ";
+	display: block;
+	position: absolute;
+	top: -9px;
+	left: -7px;
+	width: 42px;
+	height: 42px;
+	border-radius: 100px;
+	background: #007fff;
+}
+.lds-spinner div:nth-child(1) {
+	transform: rotate(0deg);
+	animation-delay: -1.1s;
+}
+.lds-spinner div:nth-child(2) {
+	transform: rotate(30deg);
+	animation-delay: -1s;
+}
+.lds-spinner div:nth-child(3) {
+	transform: rotate(60deg);
+	animation-delay: -0.9s;
+}
+.lds-spinner div:nth-child(4) {
+	transform: rotate(90deg);
+	animation-delay: -0.8s;
+}
+.lds-spinner div:nth-child(5) {
+	transform: rotate(120deg);
+	animation-delay: -0.7s;
+}
+.lds-spinner div:nth-child(6) {
+	transform: rotate(150deg);
+	animation-delay: -0.6s;
+}
+.lds-spinner div:nth-child(7) {
+	transform: rotate(180deg);
+	animation-delay: -0.5s;
+}
+.lds-spinner div:nth-child(8) {
+	transform: rotate(210deg);
+	animation-delay: -0.4s;
+}
+.lds-spinner div:nth-child(9) {
+	transform: rotate(240deg);
+	animation-delay: -0.3s;
+}
+.lds-spinner div:nth-child(10) {
+	transform: rotate(270deg);
+	animation-delay: -0.2s;
+}
+.lds-spinner div:nth-child(11) {
+	transform: rotate(300deg);
+	animation-delay: -0.1s;
+}
+.lds-spinner div:nth-child(12) {
+	transform: rotate(330deg);
+	animation-delay: 0s;
+}
+@keyframes lds-spinner {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
 }
