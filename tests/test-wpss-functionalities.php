@@ -36,7 +36,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_create_the_wpss_plugin_data_table() {
-        // echo '1';
         require_once dirname( __FILE__, 2 ) . '/inc/functions.php';
 
         global $wpdb;
@@ -53,18 +52,15 @@ class WpssTest extends TestCase {
     }
 
     public function test_constructor() {
-        // echo '2';
 		$this->assertInstanceOf( Wpss::class, $this->wpss );
     }
 	
 	public function test_wpss_class_init_hooks() {
-        // echo '3';
 		$this->wpss->init_hooks();
 		$this->assertTrue( 0 < has_action( 'admin_menu', [ $this->wpss, 'menu_registrar' ] ) );
 	}
     
     public function test_wpss_class_menu_registrar() {
-        // echo '4';
 		global $menu;
 		$this->wpss->menu_registrar();
 
@@ -104,19 +100,16 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_save_the_images() {
-        // echo '5';
         $ids = $this->wpss_class_save_the_images();
         $this->assertTrue( is_array( $ids ) && ! empty( $ids ) );
     }
 
     public function test_wpss_class_wpss_enqueue_images() {
-        // echo '6';
         $ids = $this->wpss_class_save_the_images();
         $this->assertTrue( $this->wpss->wpss_enqueue_images( $ids ) );
     }
 
     public function test_wpss_class_db_inserter() {
-        // echo '7';
         $data = [
             'slide_start' => 1,
             'slide_end'   => 2 * $this->attachment_count,
@@ -133,7 +126,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_db_slides_fetcher() {
-        // echo '8';
         $data = $this->wpss->db_slides_fetcher( true );
         $this->assertTrue( is_array( $data ) && ! empty( $data ) );
 
@@ -161,13 +153,11 @@ class WpssTest extends TestCase {
             }
         }
         ini_set('implicit_flush', true);
-        // print_r( $return_arr );
         
         return $return_arr;
     }
     
     public function test_wpss_class_fetch_settings() {
-        // echo '9';
         $nonce  = wp_create_nonce( 'pointBreak' );
         $action = 'wpss_plugin_settings_fetcher';
 
@@ -187,7 +177,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_settings_saver() {
-        // echo '10';
         $nonce  = wp_create_nonce( 'pointBreak' );
         $action = 'wpss_plugin_settings_setter';
         
@@ -223,7 +212,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_key_value_verifier_valid_data() {
-        // echo '11';
         $valid_data = [
             'slide_order' => [1, 2, 3],
             'slide_start' => 1,
@@ -266,7 +254,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_slides_rearrange() {
-        // echo '12';
         $nonce  = wp_create_nonce( 'pointBreak' );
 
         $_POST['ajaxNonce']    = $nonce;
@@ -287,7 +274,6 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_wpss_garbage_collector() {
-        // echo '13';
         $db_data     = $this->wpss->db_slides_fetcher();
         $table_array = $db_data['slide_order'];
         $arr_len     = count( $table_array );
@@ -302,14 +288,12 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_frontend_hero() {
-        // echo '14';
         $expectedHtml = '<div id="wpss-slideshow"';
         $result = $this->wpss->frontend_hero();
         $this->assertStringContainsString($expectedHtml, $result);
     }
 
     public function test_wpss_class_ajax_response() {
-        // echo '15';
         $alert_string = 'Testing case 1';
         $data = [];
         $result = $this->wpss->ajax_response( $alert_string, false, $data );
