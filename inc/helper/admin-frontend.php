@@ -6,6 +6,11 @@
  * @author t0nystark <https://profiles.wordpress.org/t0nystark/>
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+$show_formats = false;
 global $global_wpss_class_instance;
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	if ( ! isset( $_POST['dont_copy_the_nonce'] )
@@ -33,8 +38,29 @@ if ( ! is_array( $wpss_slides ) ) {
 	$wpss_slides = [];
 }
 ?>
-<div id="accordion">
-<h3 class="accordion-heading"><?php esc_html_e( 'Settings', 'slideshow' ); ?></h3>
+
+<div id="wpss-loading">
+	<div class="lds-spinner">
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+		<div></div>
+	</div>
+</div>
+
+<div class="wpss-alerts dp-none" id="wpss-main-alert">
+	<p id="wpss-main-alert-text"></p>
+</div>
+<div id="accordion" class="dp-none">
+	<h3 class="accordion-heading"><?php esc_html_e( 'Settings', 'slideshow' ); ?></h3>
 	<div id="wpss-settings">
 		<div class="preview-size setting">
 			<fieldset>
@@ -130,9 +156,15 @@ if ( ! is_array( $wpss_slides ) ) {
 			</fieldset>
 		</div>
 	</div>
-	
+
 	<h3 class="accordion-heading"><?php esc_html_e( 'Slides', 'slideshow' ); ?></h3>
 	<div>
+		<?php if ( $show_formats ) : ?>
+		<div class="wpss-alerts-red">
+			<p> <?php esc_html_e( 'Please ensure that the only supported image formats are JPEG, JPG, PNG and GIF', 'slideshow' ); ?></p>
+		</div>
+		<?php endif; ?>
+
 		<form method="POST" action="" enctype="multipart/form-data">
 			<label for="upload"><?php echo esc_html( _n( 'Add slides', 'Add more slides', count( $wpss_slides ) + 1, 'slideshow' ) ); ?></label>
 			<input type="file" name="files[]" id="wpss-files" accept="image/*" multiple>
@@ -165,3 +197,4 @@ if ( ! is_array( $wpss_slides ) ) {
 			</div>
 	</div>
 </div>
+
