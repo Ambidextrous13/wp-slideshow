@@ -8,6 +8,10 @@
 
 namespace WPSS\Inc\Classes;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * The main class responsible for managing both the admin-side and user-side aspects of the slideshow functionality.
  */
@@ -65,7 +69,7 @@ class Wpss {
 		'web_width',
 		'slide_limit',
 	];
-	
+
 	/**
 	 * Initializes the class.
 	 */
@@ -296,12 +300,7 @@ class Wpss {
 	 */
 	public function fetch_settings() {
 		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
-			echo wp_json_encode( 
-				[ 
-					'alert_string' => 'Invalid Security Token',
-					'succeed'      => false
-				]
-			);
+			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
 			wp_die( '0', 400 );
 		}
 
@@ -322,12 +321,7 @@ class Wpss {
 	 */
 	public function settings_saver() {
 		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
-			echo wp_json_encode(
-				[ 
-					'alert_string' => 'Invalid Security Token',
-					'succeed'      => false
-				] 
-			);
+			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
 			wp_die( '0', 400 );
 		}
 
@@ -335,98 +329,13 @@ class Wpss {
 		if ( is_array( $rec ) && ! empty( $rec ) ) {
 			if ( $this->key_value_verifier( $rec ) ) {
 				$this->db_inserter( null, $rec );
-				echo wp_json_encode(
-					[ 
-						'alert_string' => 'Saved!',
-						'succeed'      => true
-					]
-				);
+				echo wp_json_encode( $this->ajax_response( __( 'Saved!', 'slideshow' ), true ) );
 				wp_die( '0', 200 );
 			}
-			echo wp_json_encode(
-				[ 
-					'alert_string' => 'Verifier failed',
-					'succeed'      => false
-				]
-			);
+			echo wp_json_encode( $this->ajax_response( __( 'Verifier failed', 'slideshow' ), false ) );
 			wp_die( '0', 400 );
 		}
-		echo wp_json_encode(
-			[ 
-				'alert_string' => 'Invalid Data Given',
-				'succeed'      => false
-			]
-		);
-		wp_die( '0', 400 );
-	}
-
-	/**
-	 * Handles Ajax calls for saving slide changes.
-	 *
-	 * This function serves as an Ajax call handler for saving changes in the slides, including rearrangement, deletion, and insertion.
-	 * Actions: wpss_plugin_slide_rearrange.
-	 *
-	 * @return void
-	 */
-	public function slides_rearrange() {
-		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
-			echo wp_json_encode( 
-				[ 
-					'alert_string' => 'Invalid Security Token',
-					'succeed'      => false
-				]
-			);
-			wp_die( '0', 400 );
-		}
-
-		$rec_array = $_POST['slideOrder'];
-		if ( is_array( $rec_array ) && ! empty( $rec_array ) ) {
-			// '-1' slide ID remover.
-			if ( '-1' === $rec_array[ count( $rec_array ) - 1 ] ) {
-				unset( $rec_array[ count( $rec_array ) - 1 ] );
-			} else {
-				$rec_array = array_flip( $rec_array );
-				if ( isset( $rec_array['-1'] ) ) {
-					unset( $rec_array['-1'] );
-				}
-				$rec_array = array_flip( $rec_array );
-			}
-
-			if ( ! $this->key_value_verifier( $rec_array ) ) {
-				echo wp_json_encode(
-					[ 
-						'alert_string' => 'Invalid Data feed',
-						'succeed'      => false
-					]
-				);
-				wp_die( '0', 400 );
-			}
-
-			$table_data = $this->db_slides_fetcher();
-			if ( $this->wpss_garbage_collector( $rec_array, $table_data['slide_order'] ) ) {
-				$this->db_inserter( $rec_array, [ 'slide_end' => $table_data['slide_end'] ] );
-				echo wp_json_encode(
-					[ 
-						'alert_string' => 'Saved!',
-						'succeed'      => true 
-					] 
-				);
-				wp_die( '0', 200 );
-			}
-			echo wp_json_encode(
-				[ 
-					'alert_string' => 'Garbage Collector failed',
-					'succeed'      => false
-				] 
-			);
-			wp_die( '0', 400 );
-		}
-		echo wp_json_encode(
-			[ 
-				'alert_string' => 'Invalid Data Given',
-				'succeed'      => false
-			] 
-		);
+		echo wp_json_encode( $this->ajax_response( __( 'Invalid Data Given', 'slideshow' ), false ) );
 		wp_die( '0', 400 );
 	}
 
@@ -554,6 +463,51 @@ class Wpss {
 	}
 
 	/**
+	 * Handles Ajax calls for saving slide changes.
+	 *
+	 * This function serves as an Ajax call handler for saving changes in the slides, including rearrangement, deletion, and insertion.
+	 * Actions: wpss_plugin_slide_rearrange.
+	 *
+	 * @return void
+	 */
+	public function slides_rearrange() {
+		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
+			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
+			wp_die( '0', 400 );
+		}
+
+		$rec_array = $_POST['slideOrder'];
+		if ( is_array( $rec_array ) && ! empty( $rec_array ) ) {
+			// '-1' slide ID remover.
+			if ( '-1' === $rec_array[ count( $rec_array ) - 1 ] ) {
+				unset( $rec_array[ count( $rec_array ) - 1 ] );
+			} else {
+				$rec_array = array_flip( $rec_array );
+				if ( isset( $rec_array['-1'] ) ) {
+					unset( $rec_array['-1'] );
+				}
+				$rec_array = array_flip( $rec_array );
+			}
+
+			if ( ! $this->key_value_verifier( $rec_array ) ) {
+				echo wp_json_encode( $this->ajax_response( __( 'Invalid Data feed', 'slideshow' ), false ) );
+				wp_die( '0', 400 );
+			}
+
+			$table_data = $this->db_slides_fetcher();
+			if ( $this->wpss_garbage_collector( $rec_array, $table_data['slide_order'] ) ) {
+				$this->db_inserter( $rec_array, [ 'slide_end' => $table_data['slide_end'] ] );
+				echo wp_json_encode( $this->ajax_response( __( 'Saved!', 'slideshow' ), true ) );
+				wp_die( '0', 200 );
+			}
+			echo wp_json_encode( $this->ajax_response( __( 'Garbage Collector failed', 'slideshow' ), false ) );
+			wp_die( '0', 400 );
+		}
+		echo wp_json_encode( $this->ajax_response( __( 'Invalid Data Given', 'slideshow' ), false ) );
+		wp_die( '0', 400 );
+	}
+
+	/**
 	 * Garbage Collector: Deletes images from the Media library for space efficiency.
 	 *
 	 * This function acts as a garbage collector and deletes specific images from the Media library to improve space efficiency.
@@ -585,4 +539,40 @@ class Wpss {
 		return true;
 	}
 
+	/**
+	 * Retrieves the front-end HTML page of the plugin.
+	 *
+	 * @return string Escaped HTML string.
+	 */
+	public function frontend_hero() {
+		/**
+		 * Front End of the Slideshow.
+		 */
+		require_once untrailingslashit( dirname( __DIR__ ) ) . '/helper/wpss-slideshow.php';
+		return wpss_plugin_front_end_html( $this );
+	}
+
+	/**
+	 * Prepares an array of responses needed for an AJAX response.
+	 *
+	 * This function is primarily used to prepare a response that is compatible with the WPSS plugin, allowing the plugin to directly fetch display lines and other information.
+	 *
+	 * @param string  $alert_str Alert message string shown to the user, for example, 'Error: Invalid data' or 'Slides saved successfully.'.
+	 * @param boolean $success Indicates whether this response corresponds to success or failure.
+	 * @param array   $data Other data, which may be part of the AJAX response or for debugging purposes.
+	 * @return array A well-prepared array that can be used with `wp_send_json` or `wp_send_json_error`.
+	 */
+	public function ajax_response( $alert_str, $success, $data = null ) {
+		$temp = [
+			'alert_string' => $alert_str,
+			'succeed'      => is_bool( $success ) ? $success : false,
+		];
+
+		if ( is_array( $data ) && ! empty( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$temp[ $key ] = $value;
+			}
+		}
+		return $temp;
+	}
 }
