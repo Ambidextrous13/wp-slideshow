@@ -1,4 +1,7 @@
 <?php
+/**
+ * @group ajax
+ */
 
 Use WPSS\Inc\Classes\Wpss;
 use PHPUnit\Framework\TestCase;
@@ -11,24 +14,57 @@ class WpssTest extends TestCase {
 
     public function __construct(){
         parent::__construct();
+        
+        add_filter('wp_die_handler', [ $this, 'immortal_bhavah' ] );
+        add_filter('wp_die_ajax_handler', [ $this, 'immortal_bhavah' ] );
     }
 
     protected function setUp(): void {
         parent::setUp();
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        global $wpdb;
         require_once dirname( __FILE__, 2 ) . '/wp-slideshow.php';
         $this->wpss = new Wpss();
     }
 
+    public function immortal_bhavah() {
+        return [ $this, 'immortality_boon' ];
+    }
+    
+    public function immortality_boon(){
+        echo '';
+    }
+
+    public function test_create_the_wpss_plugin_data_table() {
+        // echo '1';
+        require_once dirname( __FILE__, 2 ) . '/inc/functions.php';
+
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'wpss';
+        $wpdb->query( ( 'DROP TABLE IF EXISTS ' . $table_name ) );
+
+        $this->assertTrue( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name );
+
+        create_the_wpss_plugin_data_table();
+
+        $result = $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" );
+        $this->assertEquals( $table_name, $result );
+    }
+
     public function test_constructor() {
+        // echo '2';
 		$this->assertInstanceOf( Wpss::class, $this->wpss );
     }
 	
 	public function test_wpss_class_init_hooks() {
+        // echo '3';
 		$this->wpss->init_hooks();
 		$this->assertTrue( 0 < has_action( 'admin_menu', [ $this->wpss, 'menu_registrar' ] ) );
 	}
     
     public function test_wpss_class_menu_registrar() {
+        // echo '4';
 		global $menu;
 		$this->wpss->menu_registrar();
 
@@ -39,10 +75,11 @@ class WpssTest extends TestCase {
                 break;
             }
         }
+
         $this->assertTrue($menu_slug_exists, 'Menu page should be added.');
 	}
 
-	protected function wpss_class_save_the_images() {
+    protected function wpss_class_save_the_images() {
         $img_1 = dirname( __FILE__ ) . '/assets/pexels-rania-alhamed-2454533.jpg';
         $img_2 = dirname( __FILE__ ) . '/assets/pexels-shantanu-pal-2679501.jpg';
 
@@ -65,18 +102,21 @@ class WpssTest extends TestCase {
         $this->attachment_count = 2;
         return $this->wpss->save_the_images( 'test_iptc_upload' );
     }
-	
+
     public function test_wpss_class_save_the_images() {
+        // echo '5';
         $ids = $this->wpss_class_save_the_images();
         $this->assertTrue( is_array( $ids ) && ! empty( $ids ) );
     }
 
-	public function test_wpss_class_wpss_enqueue_images() {
+    public function test_wpss_class_wpss_enqueue_images() {
+        // echo '6';
         $ids = $this->wpss_class_save_the_images();
         $this->assertTrue( $this->wpss->wpss_enqueue_images( $ids ) );
     }
 
     public function test_wpss_class_db_inserter() {
+        // echo '7';
         $data = [
             'slide_start' => 1,
             'slide_end'   => 2 * $this->attachment_count,
@@ -93,6 +133,7 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_db_slides_fetcher() {
+        // echo '8';
         $data = $this->wpss->db_slides_fetcher( true );
         $this->assertTrue( is_array( $data ) && ! empty( $data ) );
 
@@ -100,7 +141,7 @@ class WpssTest extends TestCase {
         $this->assertTrue( is_array( $data ) && ! empty( $data ) );
     }
 
-	protected function ajax_caller( $action ) {
+    protected function ajax_caller( $action ) {
         ini_set( 'implicit_flush', false );
 
         ob_start();
@@ -120,11 +161,13 @@ class WpssTest extends TestCase {
             }
         }
         ini_set('implicit_flush', true);
+        // print_r( $return_arr );
         
         return $return_arr;
     }
     
     public function test_wpss_class_fetch_settings() {
+        // echo '9';
         $nonce  = wp_create_nonce( 'pointBreak' );
         $action = 'wpss_plugin_settings_fetcher';
 
@@ -144,6 +187,7 @@ class WpssTest extends TestCase {
     }
 
     public function test_wpss_class_settings_saver() {
+        // echo '10';
         $nonce  = wp_create_nonce( 'pointBreak' );
         $action = 'wpss_plugin_settings_setter';
         
@@ -178,32 +222,14 @@ class WpssTest extends TestCase {
         $this->assertTrue( $assert_arg );
     }
 
-	public function test_wpss_class_slides_rearrange() {
-        $nonce  = wp_create_nonce( 'pointBreak' );
-
-        $_POST['ajaxNonce']    = $nonce;
-        $_REQUEST['ajaxNonce'] = $nonce;
-
-        $db_data = $this->wpss->db_slides_fetcher();
-        
-        $first_slide  = $db_data['slide_order'][0];
-        $second_slide = $db_data['slide_order'][1];
-
-        $db_data['slide_order'][0] = $second_slide;
-        $db_data['slide_order'][1] = $first_slide;
-        $db_data['slide_order'][]  = '-1';
-
-        $_POST['slideOrder'] = $db_data['slide_order'];
-        $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_slide_rearrange' );
-        $this->assertTrue( $response[ 'succeed' ] );
-    }
-
-	public function test_key_value_verifier_valid_data() {
+    public function test_key_value_verifier_valid_data() {
+        // echo '11';
         $valid_data = [
             'slide_order' => [1, 2, 3],
             'slide_start' => 1,
             'slide_end' => 3,
             'alignment' => 0,
+            // Add other valid data here
         ];
 
         $result = $this->wpss->key_value_verifier($valid_data);
@@ -239,7 +265,29 @@ class WpssTest extends TestCase {
         $this->assertFalse( $assert_arg );
     }
 
-	public function test_wpss_class_wpss_garbage_collector() {
+    public function test_wpss_class_slides_rearrange() {
+        // echo '12';
+        $nonce  = wp_create_nonce( 'pointBreak' );
+
+        $_POST['ajaxNonce']    = $nonce;
+        $_REQUEST['ajaxNonce'] = $nonce;
+
+        $db_data = $this->wpss->db_slides_fetcher();
+        
+        $first_slide  = $db_data['slide_order'][0];
+        $second_slide = $db_data['slide_order'][1];
+
+        $db_data['slide_order'][0] = $second_slide;
+        $db_data['slide_order'][1] = $first_slide;
+        $db_data['slide_order'][]  = '-1';
+
+        $_POST['slideOrder'] = $db_data['slide_order'];
+        $response = $this->ajax_caller( 'wp_ajax_wpss_plugin_slide_rearrange' );
+        $this->assertTrue( $response[ 'succeed' ] );
+    }
+
+    public function test_wpss_class_wpss_garbage_collector() {
+        // echo '13';
         $db_data     = $this->wpss->db_slides_fetcher();
         $table_array = $db_data['slide_order'];
         $arr_len     = count( $table_array );
@@ -253,5 +301,49 @@ class WpssTest extends TestCase {
         $this->assertFalse( wp_get_attachment_url( $deleted_id ) );
     }
 
+    public function test_wpss_class_frontend_hero() {
+        // echo '14';
+        $expectedHtml = '<div id="wpss-slideshow"';
+        $result = $this->wpss->frontend_hero();
+        $this->assertStringContainsString($expectedHtml, $result);
+    }
+
+    public function test_wpss_class_ajax_response() {
+        // echo '15';
+        $alert_string = 'Testing case 1';
+        $data = [];
+        $result = $this->wpss->ajax_response( $alert_string, false, $data );
+
+        $this->assertTrue( 
+            is_array( $result )
+            && ! empty( $result ) 
+            && isset( $result['alert_string'] ) 
+            && $alert_string === $result['alert_string']
+            && ! $result['succeed']
+        );
+
+        $alert_string = 'Testing case 2';
+        $data = [
+            'key1' => 'value1',
+            'key2' => 'value2',
+            'key3' => 'value3',
+        ];
+        $result = $this->wpss->ajax_response( $alert_string, true, $data );
+        $this->assertTrue( 
+            is_array( $result )
+            && ! empty( $result ) 
+            && isset( $result['alert_string'] ) 
+            && $alert_string === $result['alert_string']
+            && isset( $result['key1'] )
+            && 'value1' === $result['key1']
+            && isset( $result['key2'] )
+            && 'value2' === $result['key2']
+            && isset( $result['key3'] )
+            && 'value3' === $result['key3']
+            && $result['succeed']
+        );
+
+    }
 }
+
 ?>
