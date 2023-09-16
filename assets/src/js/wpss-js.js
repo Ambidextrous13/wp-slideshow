@@ -244,7 +244,7 @@
 				};
 			} else {
 				args.change = ( event ) => {
-					$( '#wpss_settings' ).trigger( 'change', [ event ] );
+					$( '#wpss-settings' ).trigger( 'change', [ event ] );
 				};
 			}
 			$( selector ).slider( args );
@@ -363,11 +363,11 @@
 		let rangeEnable = settings.slide_limit;
 		let slideAlignment = settings.alignment;
 
-		$( '#wpss_settings' ).on( 'change', function() {
-			previewShape = $( 'input[name=radio-shape]:checked', '#wpss_settings' ).val();
-			webviewShape = $( 'input[name=radio-shape-wv]:checked', '#wpss_settings' ).val();
-			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss_settings' ).val();
-			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss_settings' ).val();
+		$( '#wpss-settings' ).on( 'change', function() {
+			previewShape = $( 'input[name=radio-shape]:checked', '#wpss-settings' ).val();
+			webviewShape = $( 'input[name=radio-shape-wv]:checked', '#wpss-settings' ).val();
+			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss-settings' ).val();
+			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss-settings' ).val();
 
 			if ( '0' === previewShape && $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
 				$( '#preview_height_enc' ).removeClass( 'dp-none' );
@@ -404,7 +404,7 @@
 				settings.alignment = '2';
 			}
 		} );
-		$( '#wpss_settings' ).trigger( 'change' );
+		$( '#wpss-settings' ).trigger( 'change' );
 
 		// Settings Saver.
 		$( '#save-settings' ).on( 'click', function() {
