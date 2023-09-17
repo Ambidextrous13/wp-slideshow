@@ -269,10 +269,10 @@
 
 			ajaxOP.slide_end = -1 === parseInt( ajaxOP.slide_end ) ? slidesOrder.length : ajaxOP.slide_end;
 			slidesOrder.push( '-1' );
-			$( '#preview_width' ).val( ajaxOP.prev_width + 'px' );
-			$( '#preview_height' ).val( ajaxOP.prev_height + 'px' );
-			$( '#webview_width' ).val( ajaxOP.web_width + 'px' );
-			$( '#webview_height' ).val( ajaxOP.web_height + 'px' );
+			$( '#preview-width' ).val( ajaxOP.prev_width + 'px' );
+			$( '#preview-height' ).val( ajaxOP.prev_height + 'px' );
+			$( '#webview-width' ).val( ajaxOP.web_width + 'px' );
+			$( '#webview-height' ).val( ajaxOP.web_height + 'px' );
 			$( '#slide-range-start' ).val( ajaxOP.slide_start );
 			$( '#slide-range-end' ).val( ajaxOP.slide_end );
 			ajaxOP.prev_height = '1' === ajaxOP.prev_is_sq ? ajaxOP.prev_width : ajaxOP.prev_height;
@@ -308,7 +308,7 @@
 				$( '.img-holder' ).css( 'height', ui.value );
 				settings.prev_height = ui.value.toString();
 			}
-			$( '#preview_width' ).val( ui.value + 'px' );
+			$( '#preview-width' ).val( ui.value + 'px' );
 			settings.prev_width = ui.value.toString();
 		};
 
@@ -318,18 +318,18 @@
 		 */
 		const previewHeightCallback = function ( ui ) {
 			$( '.img-holder' ).css( 'height', ui.value );
-			$( '#preview_height' ).val( ui.value + 'px' );
+			$( '#preview-height' ).val( ui.value + 'px' );
 			settings.prev_height = ui.value.toString();
 		};
-		sliderBuilder( '#slider_width', 'min', ajaxOP.prev_width, ajaxOP.prev_w_max, 35, previewWidthCallback );
-		sliderBuilder( '#slider_height', 'min', ajaxOP.prev_height, ajaxOP.prev_h_max, 35, previewHeightCallback );
+		sliderBuilder( '#slider-width', 'min', ajaxOP.prev_width, ajaxOP.prev_w_max, 35, previewWidthCallback );
+		sliderBuilder( '#slider-height', 'min', ajaxOP.prev_height, ajaxOP.prev_h_max, 35, previewHeightCallback );
 
 		/**
 		 * callback for web view width slider.
 		 * @param {object} ui jQuery returned object.
 		 */
 		const previewWidthWVCallback = function ( ui ) {
-			$( '#webview_width' ).val( ui.value + 'px' );
+			$( '#webview-width' ).val( ui.value + 'px' );
 			settings.web_width = ui.value.toString();
 		};
 
@@ -338,11 +338,11 @@
 		 * @param {object} ui jQuery returned object.
 		 */
 		const previewHeightWVCallback = function ( ui ) {
-			$( '#webview_height' ).val( ui.value + 'px' );
+			$( '#webview-height' ).val( ui.value + 'px' );
 			settings.web_height = ui.value.toString();
 		};
-		sliderBuilder( '#slider_width_wv', 'min', ajaxOP.web_width, ajaxOP.web_w_max, 80, previewWidthWVCallback );
-		sliderBuilder( '#slider_height_wv', 'min', ajaxOP.web_height, ajaxOP.web_h_max, 80, previewHeightWVCallback );
+		sliderBuilder( '#slider-width-wv', 'min', ajaxOP.web_width, ajaxOP.web_w_max, 80, previewWidthWVCallback );
+		sliderBuilder( '#slider-height-wv', 'min', ajaxOP.web_height, ajaxOP.web_h_max, 80, previewHeightWVCallback );
 
 		/**
 		 * callback for slide' range slider.
@@ -369,22 +369,22 @@
 			rangeEnable = $( 'input[name=radio-slide-limit]:checked', '#wpss-settings' ).val();
 			slideAlignment = $( 'input[name=radio-slide-alignment]:checked', '#wpss-settings' ).val();
 
-			if ( '0' === previewShape && $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
-				$( '#preview_height_enc' ).removeClass( 'dp-none' );
+			if ( '0' === previewShape && $( '#preview-height-enc' ).hasClass( 'dp-none' ) ) {
+				$( '#preview-height-enc' ).removeClass( 'dp-none' );
 				settings.prev_is_sq = '0';
-			} else if ( '1' === previewShape && ! $( '#preview_height_enc' ).hasClass( 'dp-none' ) ) {
-				$( '#preview_height_enc' ).addClass( 'dp-none' );
+			} else if ( '1' === previewShape && ! $( '#preview-height-enc' ).hasClass( 'dp-none' ) ) {
+				$( '#preview-height-enc' ).addClass( 'dp-none' );
 				settings.prev_is_sq = '1';
 				settings.prev_height = settings.prev_width;
 				$( '.img-holder' ).css( 'height', settings.prev_height );
 				$( '.img-holder' ).css( 'width', settings.prev_width );
 			}
 
-			if ( '0' === webviewShape && $( '#webview_height_enc' ).hasClass( 'dp-none' ) ) {
-				$( '#webview_height_enc' ).removeClass( 'dp-none' );
+			if ( '0' === webviewShape && $( '#webview-height-enc' ).hasClass( 'dp-none' ) ) {
+				$( '#webview-height-enc' ).removeClass( 'dp-none' );
 				settings.web_is_sq = '0';
-			} else if ( '1' === webviewShape && ! $( '#webview_height_enc' ).hasClass( 'dp-none' ) ) {
-				$( '#webview_height_enc' ).addClass( 'dp-none' );
+			} else if ( '1' === webviewShape && ! $( '#webview-height-enc' ).hasClass( 'dp-none' ) ) {
+				$( '#webview-height-enc' ).addClass( 'dp-none' );
 				settings.web_is_sq = '1';
 			}
 

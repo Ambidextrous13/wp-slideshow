@@ -75,16 +75,16 @@ if ( ! is_array( $wpss_slides ) ) {
 
 			<fieldset>
 				<div class="slider-pack">
-					<label for="preview_width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
-					<input type="text" id="preview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
-					<div id="slider_width" class="slider"></div>
+					<label for="preview-width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
+					<input type="text" id="preview-width" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider-width" class="slider"></div>
 				</div>
 			</fieldset>
-			<fieldset id="preview_height_enc" class="dp-none">
+			<fieldset id="preview-height-enc" class="dp-none">
 				<div class="slider-pack">
-					<label for="preview_height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
-					<input type="text" id="preview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
-					<div id="slider_height" class="slider"></div>
+					<label for="preview-height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
+					<input type="text" id="preview-height" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider-height" class="slider"></div>
 				</div>
 			</fieldset>
 		</div>
@@ -101,16 +101,16 @@ if ( ! is_array( $wpss_slides ) ) {
 
 			<fieldset>
 				<div class="slider-pack">
-					<label for="webview_width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
-					<input type="text" id="webview_width" readonly style="border:0; color:#f6931f; font-weight:bold;">
-					<div id="slider_width_wv" class="slider"></div>
+					<label for="webview-width"><?php esc_html_e( 'Slide Width', 'slideshow' ); ?></label>
+					<input type="text" id="webview-width" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider-width-wv" class="slider"></div>
 				</div>
 			</fieldset>
-			<fieldset id="webview_height_enc" class="dp-none">
+			<fieldset id="webview-height-enc" class="dp-none">
 				<div class="slider-pack">
-					<label for="webview_height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
-					<input type="text" id="webview_height" readonly style="border:0; color:#f6931f; font-weight:bold;">
-					<div id="slider_height_wv" class="slider"></div>
+					<label for="webview-height"><?php esc_html_e( 'Slide Height', 'slideshow' ); ?></label>
+					<input type="text" id="webview-height" readonly style="border:0; color:#f6931f; font-weight:bold;">
+					<div id="slider-height-wv" class="slider"></div>
 				</div>
 			</fieldset>
 		</div>
