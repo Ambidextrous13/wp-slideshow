@@ -83,6 +83,9 @@
 		 * @param {boolean} succeed  True for a green alert, false for a red alert.
 		 */
 		function wpssAlert ( response, succeed ) {
+			if( typeof '' === typeof response ){
+				response = JSON.parse( response );
+			}
 			if ( response.alert_string || response.data?.alert_string ) {
 				let alert = response.alert_string ? response.alert_string : response.data.alert_string;
 				alert = succeed ? alert : alert + '.  Reloading...';

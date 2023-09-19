@@ -301,7 +301,7 @@ class Wpss {
 	public function fetch_settings() {
 		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
 			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
-			wp_die( '0', 400 );
+			wp_die( '', 400 );
 		}
 
 		$data = $this->db_slides_fetcher( true );
@@ -322,7 +322,7 @@ class Wpss {
 	public function settings_saver() {
 		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
 			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
-			wp_die( '0', 400 );
+			wp_die( '', 400 );
 		}
 
 		$rec = $_POST['wpss_settings'];
@@ -330,13 +330,13 @@ class Wpss {
 			if ( $this->key_value_verifier( $rec ) ) {
 				$this->db_inserter( null, $rec );
 				echo wp_json_encode( $this->ajax_response( __( 'Saved!', 'slideshow' ), true ) );
-				wp_die( '0', 200 );
+				wp_die( '', 200 );
 			}
 			echo wp_json_encode( $this->ajax_response( __( 'Verifier failed', 'slideshow' ), false ) );
-			wp_die( '0', 400 );
+			wp_die( '', 400 );
 		}
 		echo wp_json_encode( $this->ajax_response( __( 'Invalid Data Given', 'slideshow' ), false ) );
-		wp_die( '0', 400 );
+		wp_die( '', 400 );
 	}
 
 	/**
@@ -473,7 +473,7 @@ class Wpss {
 	public function slides_rearrange() {
 		if ( ! check_ajax_referer( 'pointBreak', 'ajaxNonce', false ) ) {
 			echo wp_json_encode( $this->ajax_response( __( 'Invalid Security Token', 'slideshow' ), false ) );
-			wp_die( '0', 400 );
+			wp_die( '', 400 );
 		}
 
 		$rec_array = $_POST['slideOrder'];
@@ -491,20 +491,20 @@ class Wpss {
 
 			if ( ! $this->key_value_verifier( $rec_array ) ) {
 				echo wp_json_encode( $this->ajax_response( __( 'Invalid Data feed', 'slideshow' ), false ) );
-				wp_die( '0', 400 );
+				wp_die( '', 400 );
 			}
 
 			$table_data = $this->db_slides_fetcher();
 			if ( $this->wpss_garbage_collector( $rec_array, $table_data['slide_order'] ) ) {
 				$this->db_inserter( $rec_array, [ 'slide_end' => $table_data['slide_end'] ] );
 				echo wp_json_encode( $this->ajax_response( __( 'Saved!', 'slideshow' ), true ) );
-				wp_die( '0', 200 );
+				wp_die( '', 200 );
 			}
 			echo wp_json_encode( $this->ajax_response( __( 'Garbage Collector failed', 'slideshow' ), false ) );
-			wp_die( '0', 400 );
+			wp_die( '', 400 );
 		}
 		echo wp_json_encode( $this->ajax_response( __( 'Invalid Data Given', 'slideshow' ), false ) );
-		wp_die( '0', 400 );
+		wp_die( '', 400 );
 	}
 
 	/**
