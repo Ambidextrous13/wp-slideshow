@@ -38,11 +38,11 @@
 	object-fit: cover;
 }
 
-.pbSliderContainer .active {
+.pbSliderContainer .wpss-active {
 	display: block;
 }
 
-.pbSliderContainer .hidden {
+.pbSliderContainer .wpss-hidden {
 	display: none;
 }
 
