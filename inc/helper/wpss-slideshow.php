@@ -56,7 +56,7 @@ function wpss_plugin_front_end_html( $wpss_instance ) {
 		for ( $wpss_slide_iterator; $wpss_slide_iterator <= $wpss_slide_end; $wpss_slide_iterator++ ) {
 			$wpss_attachment_id   = $wpss_slide_order[ $wpss_slide_iterator - 1 ];
 			$frontend_hero_resp  .= sprintf( '<li class="pbSlider slide-%1$s %2$s">', $wpss_slide_counter, $wpss_activation_text );
-			$frontend_hero_resp  .= sprintf( '<img src="%1$s" height="%2$s" width="%3$s">', esc_url( wp_get_attachment_url( $wpss_attachment_id ) ), $wpss_img_height, $wpss_img_width );
+			$frontend_hero_resp  .= sprintf( '<img src="%1$s" style="object-fit: cover; height: %2$spx; width: %3$spx">', esc_url( wp_get_attachment_url( $wpss_attachment_id ) ), $wpss_img_height, $wpss_img_width );
 			$frontend_hero_resp  .= '</li>';
 			$wpss_activation_text = 'wpss-hidden';
 			++$wpss_slide_counter;
@@ -70,8 +70,7 @@ function wpss_plugin_front_end_html( $wpss_instance ) {
 				'li'  => [ 'class' => [] ],
 				'img' => [
 					'src'    => [],
-					'height' => [],
-					'width'  => [],
+					'style'  => [],
 				],
 				'div' => [
 					'id'    => [
